@@ -1,34 +1,21 @@
 import { Tabs } from 'expo-router/js-tabs';
-import { BookOpen, House, TriangleAlert } from 'lucide-react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ToothIcon, c, f } from '@/components/ui';
+import { TabBar } from '@/components/tab-bar';
 import { useStore } from '@/lib/store';
+import { useTheme } from '@/theme';
 
-/** Four tabs: Home · Teeth · Learn · Problems. Labels follow the BM/EN switch. */
+/** Four tabs: Home · Teeth · Learn · Problems, on a floating bar. Labels follow the BM/EN switch. */
 export default function TabsLayout() {
   const { t } = useStore();
-  const insets = useSafeAreaInsets();
+  const { c } = useTheme();
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: c.primary,
-        tabBarInactiveTintColor: c.faint,
-        tabBarLabelStyle: { fontFamily: f.semi, fontSize: 11 },
-        tabBarStyle: {
-          backgroundColor: c.surface,
-          borderTopColor: c.border,
-          height: 58 + Math.max(insets.bottom, 8),
-          paddingTop: 6,
-          paddingBottom: Math.max(insets.bottom, 8),
-        },
-        sceneStyle: { backgroundColor: c.bg },
-      }}>
-      <Tabs.Screen name="index" options={{ title: t.tabHome, tabBarIcon: ({ color }) => <House color={color} size={23} strokeWidth={1.8} /> }} />
-      <Tabs.Screen name="teeth" options={{ title: t.tabTeeth, tabBarIcon: ({ color }) => <ToothIcon color={color} size={24} /> }} />
-      <Tabs.Screen name="learn" options={{ title: t.tabLearn, tabBarIcon: ({ color }) => <BookOpen color={color} size={23} strokeWidth={1.8} /> }} />
-      <Tabs.Screen name="problems" options={{ title: t.tabProblems, tabBarIcon: ({ color }) => <TriangleAlert color={color} size={23} strokeWidth={1.8} /> }} />
+      tabBar={(props) => <TabBar {...(props as any)} />}
+      screenOptions={{ headerShown: false, animation: 'none', sceneStyle: { backgroundColor: c.bg } }}>
+      <Tabs.Screen name="index" options={{ title: t.tabHome }} />
+      <Tabs.Screen name="teeth" options={{ title: t.tabTeeth }} />
+      <Tabs.Screen name="learn" options={{ title: t.tabLearn }} />
+      <Tabs.Screen name="problems" options={{ title: t.tabProblems }} />
     </Tabs>
   );
 }

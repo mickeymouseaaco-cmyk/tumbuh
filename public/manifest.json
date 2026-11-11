@@ -7,8 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FAFAF7",
-  "theme_color": "#FAFAF7",
+  "background_color": "#FFF8F1",
+  "theme_color": "#FFF8F1",
   "lang": "ms",
   "categories": ["health", "medical", "lifestyle", "education"],
   "icons": [

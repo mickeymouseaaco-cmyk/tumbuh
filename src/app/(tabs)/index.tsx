@@ -1,121 +1,196 @@
 import { router } from 'expo-router';
-import { CalendarDays, Check, Minus, Plus } from 'lucide-react-native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ArrowRight, CalendarHeart, Check, Lightbulb, Minus, PartyPopper, Plus } from 'lucide-react-native';
+import { useEffect } from 'react';
+import { ScrollView, View } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
-import { Card, Eyebrow, H2, Screen, T, c, f } from '@/components/ui';
-import { checklist, tipFor } from '@/lib/content';
+import { TeethHalo } from '@/components/mascot';
+import { Card, Display, Eyebrow, H2, PressableScale, Screen, T, ToothIcon, enter } from '@/components/ui';
+import { checklist, fill, tipFor } from '@/lib/content';
+import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
 import { dueAndNext, range } from '@/lib/teeth';
+import { fonts, motion, radius, tint, useTheme } from '@/theme';
 
-export default function Home() {
-  const { t, lang, age, setAge, erupted, todayChecks, toggleCheck } = useStore();
-  const count = Object.keys(erupted).filter((k) => erupted[k]).length;
-  const { due, next } = dueAndNext(age, erupted, lang);
-  const items = checklist(lang, count > 0 || age >= 6);
+function greeting(t: { morning: string; noon: string; evening: string; night: string }) {
+  const h = new Date().getHours();
+  return h < 12 ? t.morning : h < 15 ? t.noon : h < 19 ? t.evening : t.night;
+}
 
+function CheckRow({ label, done, onPress }: { label: string; done: boolean; onPress: () => void }) {
+  const { c } = useTheme();
+  const s = useSharedValue(1);
+  useEffect(() => {
+    if (!done) return;
+    s.value = withSequence(
+      withTiming(1.25, { duration: 120, easing: motion.ease, reduceMotion: ReduceMotion.System }),
+      withTiming(1, { duration: 220, easing: motion.ease, reduceMotion: ReduceMotion.System }),
+    );
+  }, [done, s]);
+  const pop = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
   return (
-    <Screen title={t.hello} subtitle={t.helloSub}>
-      <Card style={{ gap: 16 }}>
-        <View style={s.row}>
-          <View>
-            <T style={{ fontSize: 13, color: c.muted }}>{t.ageLabel}</T>
-            <T style={{ fontFamily: f.bold, fontSize: 30, letterSpacing: -0.5 }}>
-              {age} <T style={{ fontFamily: f.medium, fontSize: 15, color: c.muted }}>{t.months}</T>
-            </T>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Pressable accessibilityRole="button" accessibilityLabel={t.ageDown} onPress={() => setAge(age - 1)} style={s.round}>
-              <Minus size={18} color={c.text} strokeWidth={2} />
-            </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel={t.ageUp} onPress={() => setAge(age + 1)} style={s.round}>
-              <Plus size={18} color={c.text} strokeWidth={2} />
-            </Pressable>
-          </View>
-        </View>
-        <View style={{ gap: 8 }}>
-          <View style={s.row}>
-            <T style={{ fontSize: 13, color: c.muted }}>{t.teethIn}</T>
-            <T style={{ fontSize: 13, fontFamily: f.semi }}>{count} / 20</T>
-          </View>
-          <View style={s.track}>
-            <View style={[s.fill, { width: `${(count / 20) * 100}%` }]} />
-          </View>
-        </View>
-      </Card>
-
-      <Card style={{ gap: 12 }}>
-        <H2>{t.nowTitle}</H2>
-        {due.length ? (
-          <View style={{ gap: 10 }}>
-            {due.map((d) => (
-              <View key={d.name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <View style={s.dueDot} />
-                <T style={{ flex: 1, fontSize: 14 }}>{d.name}</T>
-                <T style={{ fontSize: 13, color: c.muted }}>{range(d.r, t.unit)}</T>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <T style={{ fontSize: 14, lineHeight: 21, color: c.muted }}>{t.noDue}</T>
-        )}
-        <View style={{ borderTopWidth: 1, borderTopColor: c.line, paddingTop: 12 }}>
-          <T style={{ fontSize: 13, lineHeight: 20, color: c.muted }}>
-            <T style={{ fontSize: 13, fontFamily: f.semi }}>{t.nextTitle}: </T>
-            {next ? `${next.name} · ${range(next.r, t.unit)}` : t.allDone}
-          </T>
-        </View>
-        <Pressable accessibilityRole="button" onPress={() => router.navigate('/teeth')} style={s.outlineBtn}>
-          <T style={{ fontFamily: f.semi, fontSize: 14, color: c.primary }}>{t.openChart}</T>
-        </Pressable>
-      </Card>
-
-      <Card style={{ paddingVertical: 8 }}>
-        <H2 style={{ marginTop: 10, marginBottom: 4 }}>{t.todayTitle}</H2>
-        {items.map((it) => {
-          const done = !!todayChecks[it.key];
-          return (
-            <Pressable
-              key={it.key}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: done }}
-              onPress={() => toggleCheck(it.key)}
-              style={s.check}>
-              <View style={[s.box, done && { backgroundColor: c.primary, borderColor: c.primary }]}>
-                {done ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : null}
-              </View>
-              <T style={{ color: done ? c.faint : c.text }}>{it.label}</T>
-            </Pressable>
-          );
-        })}
-      </Card>
-
-      <View style={s.tip}>
-        <Eyebrow>{t.tipTitle}</Eyebrow>
-        <T style={{ lineHeight: 23 }}>{tipFor(age, lang)}</T>
-      </View>
-
-      <Card style={{ flexDirection: 'row', gap: 14, alignItems: 'flex-start' }}>
-        <View style={s.visitIcon}>
-          <CalendarDays size={20} color={c.onAmber} strokeWidth={1.8} />
-        </View>
-        <View style={{ flex: 1, gap: 4 }}>
-          <H2 style={{ fontSize: 15 }}>{t.visitTitle}</H2>
-          <T style={{ fontSize: 14, lineHeight: 21, color: c.muted }}>{t.visitBody}</T>
-        </View>
-      </Card>
-    </Screen>
+    <PressableScale
+      scaleTo={0.98}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: done }}
+      onPress={onPress}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 56, paddingHorizontal: 14, borderRadius: radius.tile, borderCurve: 'continuous', backgroundColor: done ? c.accentSoft : c.surfaceAlt }}>
+      <Animated.View
+        style={[
+          { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: done ? c.accent : c.surface, borderWidth: done ? 0 : 2, borderColor: c.border },
+          pop,
+        ]}>
+        {done ? <Check size={16} color={c.onAccent} strokeWidth={3} /> : null}
+      </Animated.View>
+      <T style={{ flex: 1, fontFamily: fonts.medium, color: done ? c.accentText : c.text, textDecorationLine: done ? 'line-through' : 'none' }}>{label}</T>
+    </PressableScale>
   );
 }
 
-const s = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  round: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: c.outline, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' },
-  track: { height: 8, borderRadius: 4, backgroundColor: c.track, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 4, backgroundColor: c.primary },
-  dueDot: { width: 10, height: 10, borderRadius: 3, borderWidth: 1.5, borderStyle: 'dashed', borderColor: c.primary, backgroundColor: c.primarySoft },
-  outlineBtn: { alignSelf: 'flex-start', minHeight: 44, paddingHorizontal: 18, borderRadius: 999, borderWidth: 1, borderColor: c.primary, justifyContent: 'center' },
-  check: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52 },
-  box: { width: 24, height: 24, borderRadius: 8, borderWidth: 1.5, borderColor: '#B9C4C1', backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' },
-  tip: { backgroundColor: c.primarySoft, borderRadius: 20, padding: 18, gap: 6 },
-  visitIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.amber, alignItems: 'center', justifyContent: 'center' },
-});
+export default function Home() {
+  const { c } = useTheme();
+  const { t, lang, name, age, setAge, erupted, todayChecks, toggleCheck } = useStore();
+  const count = Object.keys(erupted).length;
+  const { due, next } = dueAndNext(age, erupted, lang);
+  const items = checklist(lang, count > 0 || age >= 6);
+  const doneN = items.filter((i) => todayChecks[i.key]).length;
+  const allDone = doneN === items.length;
+  const mint = tint(c, 'mint');
+  const butter = tint(c, 'butter');
+  const lilac = tint(c, 'lilac');
+  const peach = tint(c, 'peach');
+
+  const step = (d: number) => {
+    haptic.tap();
+    setAge(age + d);
+  };
+
+  return (
+    <Screen eyebrow={greeting(t)} title={fill(t.teethOf, { name })} subtitle={t.helloSub}>
+      {/* Hero */}
+      <Card index={1} style={{ backgroundColor: peach.bg, alignItems: 'center', gap: 4, paddingTop: 24, boxShadow: undefined }}>
+        <TeethHalo erupted={erupted} size={188} />
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+          <Animated.View key={count} entering={FadeInDown.duration(220)}>
+            <Display style={{ fontSize: 44, lineHeight: 50, color: peach.fg, fontVariant: ['tabular-nums'] }}>{count}</Display>
+          </Animated.View>
+          <T style={{ fontFamily: fonts.semi, color: peach.fg }}>{t.ofTwenty}</T>
+        </View>
+        <View style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, padding: 8, paddingLeft: 18, borderRadius: radius.pill, backgroundColor: c.surface }}>
+          <View>
+            <T style={{ fontSize: 12, color: c.textMuted }}>{t.ageLabel}</T>
+            <T style={{ fontFamily: fonts.bold, fontSize: 17, fontVariant: ['tabular-nums'] }}>
+              {age} {t.months}
+            </T>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <PressableScale accessibilityRole="button" accessibilityLabel={t.ageDown} onPress={() => step(-1)} style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+              <Minus size={20} color={c.accentText} strokeWidth={2.4} />
+            </PressableScale>
+            <PressableScale accessibilityRole="button" accessibilityLabel={t.ageUp} onPress={() => step(1)} style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center' }}>
+              <Plus size={20} color={c.onAccent} strokeWidth={2.4} />
+            </PressableScale>
+          </View>
+        </View>
+      </Card>
+
+      {/* Coming in now */}
+      <Animated.View entering={enter(2)} style={{ gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <H2>{t.nowTitle}</H2>
+          <PressableScale accessibilityRole="link" onPress={() => router.navigate('/teeth')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, paddingLeft: 8 }}>
+            <T style={{ fontFamily: fonts.semi, fontSize: 14, color: c.accentText }}>{t.openChart}</T>
+            <ArrowRight size={16} color={c.accentText} strokeWidth={2.4} />
+          </PressableScale>
+        </View>
+        {due.length ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 4 }} style={{ marginHorizontal: -20 }}>
+            <View style={{ width: 10 }} />
+            {due.map((d) => (
+              <View key={d.name} style={{ width: 150, padding: 14, gap: 10, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: mint.bg }}>
+                <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>
+                  <ToothIcon size={26} color={mint.fg} fill={c.enamel} />
+                </View>
+                <T style={{ fontFamily: fonts.semi, fontSize: 14, lineHeight: 19, color: mint.fg }} numberOfLines={2}>{d.name}</T>
+                <T style={{ fontSize: 13, color: mint.fg }}>{range(d.r, t.unit)}</T>
+              </View>
+            ))}
+            <View style={{ width: 10 }} />
+          </ScrollView>
+        ) : (
+          <View style={{ padding: 16, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: mint.bg }}>
+            <T style={{ fontSize: 14, lineHeight: 21, color: mint.fg }}>{t.noDue}</T>
+          </View>
+        )}
+        <T style={{ fontSize: 14, lineHeight: 21, color: c.textMuted }}>
+          <T style={{ fontSize: 14, fontFamily: fonts.semi }}>{t.nextTitle}: </T>
+          {next ? `${next.name} · ${range(next.r, t.unit)}` : t.allDone}
+        </T>
+      </Animated.View>
+
+      {/* Routine */}
+      <Card index={3} style={{ gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+          <H2>{t.todayTitle}</H2>
+          <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill, backgroundColor: c.surfaceAlt }}>
+            <T style={{ fontFamily: fonts.bold, fontSize: 12, color: c.textMuted, fontVariant: ['tabular-nums'] }}>{fill(t.doneCount, { n: doneN })}</T>
+          </View>
+        </View>
+        {items.map((it) => (
+          <CheckRow
+            key={it.key}
+            label={it.label}
+            done={!!todayChecks[it.key]}
+            onPress={() => {
+              const willFinish = !todayChecks[it.key] && doneN === items.length - 1;
+              willFinish ? haptic.success() : haptic.tap();
+              toggleCheck(it.key);
+            }}
+          />
+        ))}
+        {allDone ? (
+          <Animated.View
+            entering={FadeIn.duration(motion.base)}
+            exiting={FadeOut.duration(150)}
+            layout={LinearTransition.duration(motion.base)}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radius.tile, backgroundColor: mint.bg }}>
+            <PartyPopper size={22} color={mint.fg} strokeWidth={2} />
+            <T style={{ flex: 1, fontFamily: fonts.semi, color: mint.fg }}>{t.allDoneToday}</T>
+          </Animated.View>
+        ) : null}
+      </Card>
+
+      {/* Tip */}
+      <Animated.View entering={enter(4)} style={{ flexDirection: 'row', gap: 14, padding: 20, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: butter.bg }}>
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>
+          <Lightbulb size={22} color={butter.fg} strokeWidth={2} />
+        </View>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Eyebrow color={butter.fg}>{t.tipTitle}</Eyebrow>
+          <T style={{ lineHeight: 23, color: butter.fg }}>{tipFor(age, lang)}</T>
+        </View>
+      </Animated.View>
+
+      {/* Dentist */}
+      <Animated.View entering={enter(5)} style={{ flexDirection: 'row', gap: 14, padding: 20, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: lilac.bg }}>
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>
+          <CalendarHeart size={22} color={lilac.fg} strokeWidth={2} />
+        </View>
+        <View style={{ flex: 1, gap: 4 }}>
+          <T style={{ fontFamily: fonts.display, fontSize: 17, color: lilac.fg }}>{t.visitTitle}</T>
+          <T style={{ fontSize: 14, lineHeight: 21, color: lilac.fg }}>{t.visitBody}</T>
+        </View>
+      </Animated.View>
+    </Screen>
+  );
+}

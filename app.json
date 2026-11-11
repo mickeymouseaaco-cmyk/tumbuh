@@ -6,15 +6,17 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "tumbuh",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.tumbuh.baby",
-      "config": { "usesNonExemptEncryption": false }
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F0EE",
+        "backgroundColor": "#FBE3EA",
         "foregroundImage": "./assets/images/icon-foreground.png"
       },
       "package": "app.tumbuh.baby"
@@ -24,17 +26,20 @@
       "favicon": "./assets/images/favicon.png",
       "name": "Tumbuh",
       "shortName": "Tumbuh",
-      "themeColor": "#FAFAF7",
-      "backgroundColor": "#FAFAF7"
+      "themeColor": "#FFF8F1",
+      "backgroundColor": "#FFF8F1"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FAFAF7",
+          "backgroundColor": "#FFF8F1",
           "image": "./assets/images/icon-foreground.png",
-          "imageWidth": 140
+          "imageWidth": 140,
+          "dark": {
+            "backgroundColor": "#17121B"
+          }
         }
       ],
       "expo-font"

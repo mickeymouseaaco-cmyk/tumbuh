@@ -1,3 +1,4 @@
+import { Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
 import {
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
@@ -5,18 +6,19 @@ import {
   PlusJakartaSans_700Bold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { useFonts } from 'expo-font';
-import { DefaultTheme, Stack, ThemeProvider, router, useSegments } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { c } from '@/components/ui';
 import { StoreProvider, useStore } from '@/lib/store';
+import { useTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-/** First visit goes to the welcome screen; after that, straight to Home. */
+/** First visit goes to the welcome flow; after that, straight to Home. Splash holds until both are known. */
 function Gate({ fontsReady }: { fontsReady: boolean }) {
   const { ready, onboarded } = useStore();
   const segments = useSegments();
@@ -32,32 +34,43 @@ function Gate({ fontsReady }: { fontsReady: boolean }) {
   return null;
 }
 
-const navTheme = {
-  ...DefaultTheme,
-  colors: { ...DefaultTheme.colors, background: c.bg, card: c.surface, text: c.text, border: c.border, primary: c.primary },
-};
+function Navigator({ fontsReady }: { fontsReady: boolean }) {
+  const { c, dark } = useTheme();
+  const base = dark ? DarkTheme : DefaultTheme;
+  const navTheme = {
+    ...base,
+    colors: { ...base.colors, background: c.bg, card: c.bg, text: c.text, border: c.border, primary: c.accent },
+  };
+  return (
+    <ThemeProvider value={navTheme}>
+      <StatusBar style={dark ? 'light' : 'dark'} />
+      <Gate fontsReady={fontsReady} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="welcome" options={{ animation: 'fade', gestureEnabled: false }} />
+        <Stack.Screen name="learn/[id]" />
+      </Stack>
+    </ThemeProvider>
+  );
+}
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
+    Fredoka_600SemiBold,
+    Fredoka_700Bold,
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
   });
-  const fontsReady = loaded || !!error;
 
   return (
-    <SafeAreaProvider>
-      <StoreProvider>
-        <ThemeProvider value={navTheme}>
-          <StatusBar style="dark" />
-          <Gate fontsReady={fontsReady} />
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
-          </Stack>
-        </ThemeProvider>
-      </StoreProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StoreProvider>
+          <Navigator fontsReady={loaded || !!error} />
+        </StoreProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

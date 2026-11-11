@@ -61,6 +61,27 @@ export const strings = {
     tabTeeth: 'Gigi',
     tabLearn: 'Belajar',
     tabProblems: 'Masalah',
+    next: 'Seterusnya',
+    back: 'Kembali',
+    skip: 'Langkau',
+    nameQ: 'Siapa nama si kecil?',
+    nameHint: 'Kami guna nama ini untuk sapa anda setiap hari. Boleh tukar nanti.',
+    namePlaceholder: 'Nama panggilan',
+    ageQ: 'Berapa umur {name}?',
+    ageHint: 'Kami akan tunjuk gigi yang biasanya tumbuh pada umur ini.',
+    littleOne: 'si kecil',
+    morning: 'Selamat pagi', noon: 'Selamat tengah hari', evening: 'Selamat petang', night: 'Selamat malam',
+    teethOf: 'Gigi {name}',
+    ofTwenty: 'daripada 20 gigi',
+    allDoneToday: 'Hebat! Rutin hari ini lengkap.',
+    doneCount: '{n}/3 siap',
+    youAreHere: 'Umur {name} sekarang',
+    tapTooth: 'Tekan mana-mana gigi',
+    didYouKnow: 'Tahukah anda?',
+    topics: 'Topik',
+    stepsCount: '{n} perkara',
+    callTitle: 'Ragu-ragu?',
+    callBody: 'Klinik pergigian kerajaan dan swasta boleh periksa anak anda. Lebih awal, lebih baik.',
     jaw: { U: 'atas', L: 'bawah' },
     side: { R: 'kanan', L: 'kiri' },
   },
@@ -116,6 +137,27 @@ export const strings = {
     tabTeeth: 'Teeth',
     tabLearn: 'Learn',
     tabProblems: 'Problems',
+    next: 'Next',
+    back: 'Back',
+    skip: 'Skip',
+    nameQ: "What's your little one's name?",
+    nameHint: "We'll use it to greet you each day. You can change it later.",
+    namePlaceholder: 'Nickname',
+    ageQ: 'How old is {name}?',
+    ageHint: "We'll show which teeth usually come in around this age.",
+    littleOne: 'your little one',
+    morning: 'Good morning', noon: 'Good afternoon', evening: 'Good evening', night: 'Good night',
+    teethOf: "{name}'s teeth",
+    ofTwenty: 'of 20 teeth',
+    allDoneToday: "Lovely! Today's routine is done.",
+    doneCount: '{n}/3 done',
+    youAreHere: "{name}'s age now",
+    tapTooth: 'Tap any tooth',
+    didYouKnow: 'Did you know?',
+    topics: 'Topics',
+    stepsCount: '{n} things',
+    callTitle: 'Not sure?',
+    callBody: 'Any government or private dental clinic can check your child. Earlier is better.',
     jaw: { U: 'Upper', L: 'Lower' },
     side: { R: 'right', L: 'left' },
   },
@@ -204,6 +246,17 @@ export const facts: Record<Lang, string[]> = {
 };
 
 export type LearnSection = { title: string; items: { title: string; points: string[] }[] };
+
+/** Learn topics, same order as `learn[lang]`. Icon names map to lucide icons in the Learn screen. */
+export const topicMeta = [
+  { id: 'clean', icon: 'droplets', tint: 'sky', blurb: { bm: 'Lap gusi, berus gigi, cara mudah', en: 'Wiping gums, brushing, easy tricks' } },
+  { id: 'fluoride', icon: 'shield', tint: 'mint', blurb: { bm: 'Berapa banyak & kenapa penting', en: 'How much, and why it matters' } },
+  { id: 'food', icon: 'apple', tint: 'peach', blurb: { bm: 'Botol, gula & kuman', en: 'Bottles, sugar and germs' } },
+  { id: 'teething', icon: 'baby', tint: 'lilac', blurb: { bm: 'Tanda, cara legakan, elakkan', en: 'Signs, soothing, what to avoid' } },
+  { id: 'dentist', icon: 'stethoscope', tint: 'butter', blurb: { bm: 'Bila pergi & apa berlaku', en: 'When to go and what happens' } },
+] as const;
+
+export const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
 
 export const learn: Record<Lang, LearnSection[]> = {
   bm: [

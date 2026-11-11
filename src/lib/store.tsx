@@ -7,13 +7,14 @@ import { strings, type Lang, type Strings } from './content';
 type Saved = {
   onboarded: boolean;
   lang: Lang;
+  babyName: string;
   age: number; // months, 0–36
   erupted: Record<string, boolean>; // tooth id → in
   checks: Record<string, Record<string, boolean>>; // 'YYYY-MM-DD' → item key → done
 };
 
 const KEY = 'tumbuh:v1';
-const initial: Saved = { onboarded: false, lang: 'bm', age: 6, erupted: {}, checks: {} };
+const initial: Saved = { onboarded: false, lang: 'bm', babyName: '', age: 6, erupted: {}, checks: {} };
 
 export const today = () => {
   const d = new Date();
@@ -26,6 +27,9 @@ type Ctx = Saved & {
   t: Strings;
   setLang: (l: Lang) => void;
   setAge: (a: number) => void;
+  setName: (n: string) => void;
+  /** Baby's name, or 'si kecil' / 'your little one'. */
+  name: string;
   finishWelcome: () => void;
   toggleTooth: (id: string) => void;
   toggleCheck: (key: string) => void;
@@ -65,6 +69,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       t: strings[data.lang],
       todayChecks: data.checks[day] ?? {},
       setLang: (lang) => update((d) => ({ ...d, lang })),
+      name: data.babyName.trim() || strings[data.lang].littleOne,
+      setName: (n) => update((d) => ({ ...d, babyName: n.slice(0, 24) })),
       setAge: (a) => update((d) => ({ ...d, age: Math.max(0, Math.min(36, a)) })),
       finishWelcome: () => update((d) => ({ ...d, onboarded: true })),
       toggleTooth: (id) =>
