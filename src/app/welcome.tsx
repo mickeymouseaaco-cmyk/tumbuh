@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { Check, ChevronLeft, Minus, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
@@ -22,7 +21,7 @@ const langs = [
 
 export default function Welcome() {
   const { c } = useTheme();
-  const { t, lang, setLang, babyName, setName, name, age, setAge, finishWelcome } = useStore();
+  const { t, lang, setLang, babyName, setName, name, age, setAge, addAge, finishWelcome } = useStore();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
@@ -34,8 +33,8 @@ export default function Welcome() {
   };
   const finish = () => {
     haptic.success();
+    // The root Gate moves to Home once `onboarded` is saved, so the two never race.
     finishWelcome();
-    router.replace('/');
   };
   const entering = (dir === 1 ? FadeInRight : FadeInLeft).duration(motion.enter).easing(motion.ease);
 
@@ -142,7 +141,7 @@ export default function Welcome() {
                 <Display style={{ fontSize: 32, lineHeight: 38 }}>{fill(t.ageQ, { name })}</Display>
                 <T style={{ fontSize: 16, lineHeight: 24, color: c.textMuted }}>{t.ageHint}</T>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: c.surface, borderRadius: radius.card, borderCurve: 'continuous', padding: 16 }}>
-                  <PressableScale accessibilityRole="button" accessibilityLabel={t.ageDown} onPress={() => { haptic.tap(); setAge(age - 1); }} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                  <PressableScale accessibilityRole="button" accessibilityLabel={t.ageDown} onPress={() => { haptic.tap(); addAge(-1); }} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
                     <Minus size={24} color={c.accentText} strokeWidth={2.4} />
                   </PressableScale>
                   <View style={{ alignItems: 'center' }}>
@@ -151,7 +150,7 @@ export default function Welcome() {
                     </Animated.View>
                     <T style={{ fontFamily: fonts.semi, color: c.textMuted }}>{t.months}</T>
                   </View>
-                  <PressableScale accessibilityRole="button" accessibilityLabel={t.ageUp} onPress={() => { haptic.tap(); setAge(age + 1); }} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                  <PressableScale accessibilityRole="button" accessibilityLabel={t.ageUp} onPress={() => { haptic.tap(); addAge(1); }} style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
                     <Plus size={24} color={c.accentText} strokeWidth={2.4} />
                   </PressableScale>
                 </View>

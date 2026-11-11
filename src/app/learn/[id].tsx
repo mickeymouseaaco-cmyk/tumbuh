@@ -24,7 +24,7 @@ export default function Topic() {
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Stack.Screen options={{ title: sec.title }} />
-      <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         <View style={{ backgroundColor: tt.bg, paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 28, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, borderCurve: 'continuous' }}>
           <View style={{ width: '100%', maxWidth: 560, alignSelf: 'center', gap: 18 }}>
             <PressableScale

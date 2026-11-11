@@ -59,7 +59,7 @@ function CheckRow({ label, done, onPress }: { label: string; done: boolean; onPr
 
 export default function Home() {
   const { c } = useTheme();
-  const { t, lang, name, age, setAge, erupted, todayChecks, toggleCheck } = useStore();
+  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck } = useStore();
   const count = Object.keys(erupted).length;
   const { due, next } = dueAndNext(age, erupted, lang);
   const items = checklist(lang, count > 0 || age >= 6);
@@ -72,7 +72,7 @@ export default function Home() {
 
   const step = (d: number) => {
     haptic.tap();
-    setAge(age + d);
+    addAge(d);
   };
 
   return (
@@ -108,7 +108,7 @@ export default function Home() {
       <Animated.View entering={enter(2)} style={{ gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <H2>{t.nowTitle}</H2>
-          <PressableScale accessibilityRole="link" onPress={() => router.navigate('/teeth')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, paddingLeft: 8 }}>
+          <PressableScale accessibilityRole="button" onPress={() => router.navigate('/teeth')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, paddingLeft: 8 }}>
             <T style={{ fontFamily: fonts.semi, fontSize: 14, color: c.accentText }}>{t.openChart}</T>
             <ArrowRight size={16} color={c.accentText} strokeWidth={2.4} />
           </PressableScale>

@@ -27,6 +27,8 @@ type Ctx = Saved & {
   t: Strings;
   setLang: (l: Lang) => void;
   setAge: (a: number) => void;
+  /** Step the age by +1/-1 from the latest value (safe for rapid taps). */
+  addAge: (d: number) => void;
   setName: (n: string) => void;
   /** Baby's name, or 'si kecil' / 'your little one'. */
   name: string;
@@ -72,6 +74,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       name: data.babyName.trim() || strings[data.lang].littleOne,
       setName: (n) => update((d) => ({ ...d, babyName: n.slice(0, 24) })),
       setAge: (a) => update((d) => ({ ...d, age: Math.max(0, Math.min(36, a)) })),
+      addAge: (n) => update((d) => ({ ...d, age: Math.max(0, Math.min(36, d.age + n)) })),
       finishWelcome: () => update((d) => ({ ...d, onboarded: true })),
       toggleTooth: (id) =>
         update((d) => {

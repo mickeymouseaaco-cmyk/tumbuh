@@ -41,7 +41,7 @@ export function ToothIcon({ size = 24, color, fill = 'none', strokeWidth = 1.8 }
 export function T({ style, children, ...rest }: TextProps & { style?: StyleProp<TextStyle>; children?: ReactNode }) {
   const { c } = useTheme();
   return (
-    <Text style={[{ fontFamily: fonts.body, color: c.text, fontSize: 15 }, style]} {...rest}>
+    <Text selectable={false} style={[{ fontFamily: fonts.body, color: c.text, fontSize: 15 }, style]} {...rest}>
       {children}
     </Text>
   );
@@ -200,7 +200,6 @@ export function Screen({ title, subtitle, eyebrow, children }: { title: string; 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: c.bg }}
-      contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 120, paddingHorizontal: 20 }}>
       <View style={{ width: '100%', maxWidth: 560, alignSelf: 'center', gap: 16 }}>

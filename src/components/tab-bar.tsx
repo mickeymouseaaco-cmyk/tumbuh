@@ -31,7 +31,7 @@ export function TabBar({ state, navigation }: Props) {
   const labels: Record<string, string> = { index: t.tabHome, teeth: t.tabTeeth, learn: t.tabLearn, problems: t.tabProblems };
 
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: Math.max(insets.bottom, 12), paddingHorizontal: 16, alignItems: 'center' }}>
+    <View style={{ pointerEvents: 'box-none', position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: Math.max(insets.bottom, 12), paddingHorizontal: 16, alignItems: 'center' }}>
       <View
         onLayout={(e) => setW(e.nativeEvent.layout.width - 12)}
         style={{
