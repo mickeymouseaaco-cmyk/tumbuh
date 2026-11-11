@@ -1,0 +1,19 @@
+{
+  "name": "Tumbuh – Gigi Si Kecil",
+  "short_name": "Tumbuh",
+  "description": "Pantau tumbuh gigi anak, belajar jaga gigi, dan kenal masalah biasa. Track your baby's teeth, learn simple care, and spot common problems.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAFAF7",
+  "theme_color": "#FAFAF7",
+  "lang": "ms",
+  "categories": ["health", "medical", "lifestyle", "education"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

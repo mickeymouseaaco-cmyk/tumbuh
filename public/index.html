@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ms">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+    <title>Tumbuh</title>
+    <meta name="description" content="Pantau tumbuh gigi anak, belajar jaga gigi, dan kenal masalah biasa." />
+
+    <!-- Install as an app (Tumbuh on the home screen). -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#FAFAF7" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Tumbuh" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="application-name" content="Tumbuh" />
+
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+        background-color: #fafaf7;
+      }
+      body {
+        overflow: hidden;
+      }
+      #root {
+        display: flex;
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: var(--app-h, 100%);
+        flex: 1;
+      }
+    </style>
+    <script>
+      // Size the app to the real screen height (fixes a gap under the tab bar on iPhone home-screen apps).
+      (function () {
+        function fit() {
+          var h = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
+          document.documentElement.style.setProperty('--app-h', h + 'px');
+        }
+        fit();
+        window.addEventListener('load', fit);
+        window.addEventListener('resize', fit);
+        window.addEventListener('orientationchange', function () {
+          setTimeout(fit, 300);
+        });
+      })();
+    </script>
+
+    <!-- Offline start-up (public/sw.js). -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <noscript>Tumbuh perlukan JavaScript. Tumbuh needs JavaScript turned on.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
