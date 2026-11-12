@@ -20,6 +20,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { LogoMark } from '@/components/logo';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
 import { fonts, motion, radius, useTheme } from '@/theme';
@@ -208,8 +209,8 @@ export function Screen({ title, subtitle, eyebrow, children }: { title: string; 
       <View style={{ width: '100%', maxWidth: 560, alignSelf: 'center', gap: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 36, height: 36, borderRadius: 12, borderCurve: 'continuous', backgroundColor: c.accentSoft, borderWidth: 1, borderColor: c.accent, boxShadow: `0 0 16px ${c.glow}`, alignItems: 'center', justifyContent: 'center' }}>
-              <ToothIcon size={20} fill={c.enamel} />
+            <View style={{ borderRadius: 11, boxShadow: `0 0 18px ${c.glow}` }}>
+              <LogoMark size={36} />
             </View>
             <T style={{ fontFamily: fonts.displayBold, fontSize: 20, letterSpacing: 0.5, color: c.text }}>tumbuh<T style={{ fontFamily: fonts.displayBold, fontSize: 20, color: c.accent }}>.</T></T>
           </View>
