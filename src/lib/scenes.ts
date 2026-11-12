@@ -222,6 +222,9 @@ export const scenes: Record<string, Layer[]> = {
 };
 
 scenes['topic-clean'] = scenes.brush;
-scenes['topic-food'] = scenes.cup;
+scenes['topic-food'] = scenes.water;
 scenes['topic-teething'] = scenes.teether;
-scenes['topic-dentist'] = scenes.quick;
+scenes['topic-dentist'] = [
+  { part: 'tooth', x: 58, y: 26, s: 1.05 },
+  { part: 'mirror', x: 4, y: 12, s: 1.05, origin: 'bottom left', anims: [{ p: 'r', from: -6, to: 6, ms: 900 }] },
+];

@@ -1,11 +1,11 @@
 import { X } from 'lucide-react-native';
 import { useEffect, useRef } from 'react';
-import { Modal, ScrollView, View, useWindowDimensions } from 'react-native';
+import { Image, Modal, ScrollView, View, useWindowDimensions } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { BabyHead, MOUTH_OFFSET } from '@/components/mascot';
+import { BABY_ART, BABY_MOUTH } from '@/components/mascot';
 import { MouthExplorer } from '@/components/mouth';
 import { Display, PressableScale, T } from '@/components/ui';
 import { fill } from '@/lib/content';
@@ -24,7 +24,7 @@ export type HeadRect = { x: number; y: number; size: number };
  */
 export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClose: () => void }) {
   const { c } = useTheme();
-  const { t, name, erupted, age } = useStore();
+  const { t, name } = useStore();
   const { width: W, height: H } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
@@ -50,9 +50,11 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
   const o = origin ?? { x: 0, y: 0, size: 1 };
   const hx = o.x + o.size / 2;
   const hy = o.y + o.size / 2;
-  const mouthY = o.size * MOUTH_OFFSET.y;
-  const S1 = (W * 1.25) / (o.size * 0.28); // mouth (≈28% of the head) grows past the screen width
-  const tx = W / 2 - hx;
+  const mouthX = o.size * BABY_MOUTH.x;
+  const mouthY = o.size * BABY_MOUTH.y;
+  // the mouth grows until it is wider than the screen (capped so the artwork stays sharp enough)
+  const S1 = Math.min(14, (W * 1.25) / (o.size * BABY_MOUTH.w));
+  const tx = W / 2 - hx - mouthX * S1;
   const ty = H * 0.45 - hy - mouthY * S1;
 
   const headStyle = useAnimatedStyle(() => {
@@ -78,7 +80,7 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.bg }, roomStyle]} />
 
         <Animated.View style={[{ position: 'absolute', left: o.x, top: o.y, width: o.size, height: o.size }, headStyle]}>
-          <BabyHead size={o.size} erupted={erupted} age={age} />
+          <Image source={BABY_ART} style={{ width: o.size, height: o.size }} resizeMode="contain" accessibilityIgnoresInvertColors />
         </Animated.View>
 
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, cavityStyle]}>
