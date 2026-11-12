@@ -5,7 +5,6 @@ import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LearnVisual, TagBadge } from '@/components/learn-visual';
-import { ArtImage, BABY_ART, FAMILY_ART } from '@/components/art-image';
 import { Cartoon } from '@/components/cartoon';
 import { Aurora, Disclaimer, Display, PressableScale, T, enter } from '@/components/ui';
 import { learn, learnCards, topicMeta } from '@/lib/content';
@@ -39,13 +38,7 @@ export default function Topic() {
 
           <Animated.View entering={enter(0)} style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
             <View style={{ borderRadius: radius.tile, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
-              {m.id === 'clean' ? (
-                <ArtImage source={FAMILY_ART} width={110} height={94} />
-              ) : m.id === 'teething' ? (
-                <ArtImage source={BABY_ART} width={100} height={94} />
-              ) : (
-                <Cartoon name={`topic-${m.id}`} scale={0.8} />
-              )}
+              <Cartoon name={`topic-${m.id}`} scale={0.8} />
             </View>
             <Display style={{ flex: 1, fontSize: 28, lineHeight: 33 }}>{learn[lang][i].title}</Display>
           </Animated.View>

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, {
   Easing,
   ReduceMotion,
@@ -21,13 +21,6 @@ const MOUTH = 'M58 110 Q80 105 102 110 Q100 134 80 135 Q60 134 58 110 Z';
 
 /** Where the mouth sits inside the head drawing, as a fraction of its size from the centre. */
 export const MOUTH_OFFSET = { x: 0, y: 40 / 160 };
-
-/** The illustrated baby (crawling, finger at its first teeth), square artwork with a transparent background. */
-export const BABY_ART = require('../../assets/images/baby.png');
-/** Where that baby's mouth is, as a fraction of the square from its centre, and its rough width. */
-export const BABY_MOUTH = { x: 0.067, y: -0.067, w: 0.11 };
-/** How far the artwork sits inside the halo on every side. */
-export const HALO_INSET = 20;
 
 /** "Si Kecil": a softly shaded baby whose open smile shows the front teeth you've marked. */
 export function BabyHead({ size = 140, erupted, age = 9 }: { size?: number; erupted: Record<string, boolean>; age?: number }) {
@@ -148,7 +141,7 @@ export function TeethHalo({ erupted, age, size = 200, float = true }: { erupted:
         return <Bead key={i} on={i < count} x={size / 2 + r * Math.cos(a)} y={size / 2 + r * Math.sin(a)} />;
       })}
       <Animated.View style={head}>
-        <Image source={BABY_ART} style={{ width: size - HALO_INSET * 2, height: size - HALO_INSET * 2 }} resizeMode="contain" accessibilityIgnoresInvertColors />
+        <BabyHead size={size - 56} erupted={erupted} age={age} />
       </Animated.View>
     </View>
   );
