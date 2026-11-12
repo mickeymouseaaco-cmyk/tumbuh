@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View 
 import Animated, { FadeIn, FadeInLeft, FadeInRight, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BabyPortrait, TeethHalo } from '@/components/mascot';
+import { TeethHalo } from '@/components/mascot';
 import { Button, Display, PressableScale, T } from '@/components/ui';
 import { fill } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
@@ -21,7 +21,7 @@ const langs = [
 
 export default function Welcome() {
   const { c } = useTheme();
-  const { t, lang, setLang, babyName, setName, name, age, setAge, addAge, finishWelcome, gender, setGender } = useStore();
+  const { t, lang, setLang, babyName, setName, name, age, setAge, addAge, finishWelcome } = useStore();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
@@ -60,7 +60,7 @@ export default function Welcome() {
                 />
               ))}
             </View>
-            {step === 1 && gender ? (
+            {step === 1 ? (
               <Pressable accessibilityRole="button" onPress={() => go(2)} hitSlop={8} style={{ minWidth: 44, height: 44, alignItems: 'flex-end', justifyContent: 'center' }}>
                 <T style={{ fontFamily: fonts.semi, color: c.textMuted }}>{t.skip}</T>
               </Pressable>
@@ -114,38 +114,14 @@ export default function Welcome() {
 
             {step === 1 ? (
               <Animated.View key="s1" entering={entering} exiting={FadeOut.duration(140)} style={{ gap: 20 }}>
-                {/* boy or girl first, then the name */}
-                <Display style={{ fontSize: 28, lineHeight: 34 }}>{t.genderQ}</Display>
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  {(['boy', 'girl'] as const).map((g) => {
-                    const on = gender === g;
-                    return (
-                      <PressableScale
-                        key={g}
-                        accessibilityRole="radio"
-                        accessibilityState={{ checked: on }}
-                        onPress={() => {
-                          if (!on) haptic.tap();
-                          setGender(g);
-                        }}
-                        style={{
-                          flex: 1, alignItems: 'center', gap: 10, paddingVertical: 16, borderRadius: radius.card, borderCurve: 'continuous', borderWidth: 2,
-                          borderColor: on ? c.accent : c.border, backgroundColor: on ? c.accentSoft : c.surface,
-                          boxShadow: on ? `0 0 22px ${c.glow}` : undefined,
-                        }}>
-                        <BabyPortrait gender={g} size={96} still={!on} />
-                        <T style={{ fontFamily: fonts.semi, fontSize: 16, color: on ? c.accentText : c.text }}>{g === 'boy' ? t.boy : t.girl}</T>
-                      </PressableScale>
-                    );
-                  })}
-                </View>
-                <Display style={{ fontSize: 28, lineHeight: 34, marginTop: 8 }}>{t.nameQ}</Display>
+                <Display style={{ fontSize: 32, lineHeight: 38 }}>{t.nameQ}</Display>
                 <T style={{ fontSize: 16, lineHeight: 24, color: c.textMuted }}>{t.nameHint}</T>
                 <TextInput
                   defaultValue={babyName}
                   onChangeText={setName}
                   placeholder={t.namePlaceholder}
                   placeholderTextColor={c.textMuted}
+                  autoFocus={Platform.OS !== 'web'}
                   autoCapitalize="words"
                   returnKeyType="next"
                   onSubmitEditing={() => go(2)}
@@ -198,18 +174,7 @@ export default function Welcome() {
           </ScrollView>
 
           <View style={{ gap: 10 }}>
-            {step < 2 ? (
-              <Button
-                label={t.next}
-                onPress={() => {
-                  if (step === 1 && !gender) return; // pick boy or girl first
-                  go(step + 1);
-                }}
-                style={step === 1 && !gender ? { opacity: 0.4 } : undefined}
-              />
-            ) : (
-              <Button label={t.start} onPress={finish} />
-            )}
+            {step < 2 ? <Button label={t.next} onPress={() => go(step + 1)} /> : <Button label={t.start} onPress={finish} />}
             {step === 0 ? <T style={{ fontSize: 12, lineHeight: 18, color: c.textMuted, textAlign: 'center' }}>{t.disclaimer}</T> : null}
           </View>
         </View>
