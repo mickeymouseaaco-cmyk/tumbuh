@@ -16,7 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { TeethHalo } from '@/components/mascot';
+import { PORTRAIT_INSET, TeethHalo } from '@/components/mascot';
 import { MouthZoom, type HeadRect } from '@/components/mouth-zoom';
 import { Card, Display, Eyebrow, H2, PressableScale, Screen, T, ToothIcon, enter } from '@/components/ui';
 import { checklist, fill, tipFor } from '@/lib/content';
@@ -76,7 +76,7 @@ function CheckRow({ label, done, onPress }: { label: string; done: boolean; onPr
 
 export default function Home() {
   const { c } = useTheme();
-  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck } = useStore();
+  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender } = useStore();
   const count = Object.keys(erupted).length;
   const { due, next } = dueAndNext(age, erupted, lang);
   const items = checklist(lang, count > 0 || age >= 6);
@@ -90,8 +90,8 @@ export default function Home() {
   const [zoom, setZoom] = useState<HeadRect | null>(null);
   const openMouth = () => {
     haptic.soft();
-    // The head sits 28px inside the halo on every side.
-    haloRef.current?.measureInWindow((x, y, w) => setZoom({ x: x + 28, y: y + 28, size: w - 56 }));
+    // The portrait sits PORTRAIT_INSET px inside the halo on every side.
+    haloRef.current?.measureInWindow((x, y, w) => setZoom({ x: x + PORTRAIT_INSET, y: y + PORTRAIT_INSET, size: w - PORTRAIT_INSET * 2 }));
   };
 
   const step = (d: number) => {
@@ -109,9 +109,25 @@ export default function Home() {
           onPress={openMouth}
           style={{ alignItems: 'center' }}>
           <View ref={haloRef} collapsable={false}>
-            <TeethHalo erupted={erupted} age={age} size={HALO} />
+            <TeethHalo erupted={erupted} gender={gender} size={HALO} />
           </View>
         </Pressable>
+        {!gender ? (
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 4 }}>
+            {(['boy', 'girl'] as const).map((g) => (
+              <PressableScale
+                key={g}
+                accessibilityRole="button"
+                onPress={() => {
+                  haptic.tap();
+                  setGender(g);
+                }}
+                style={{ minHeight: 40, paddingHorizontal: 16, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border }}>
+                <T style={{ fontFamily: fonts.semi, fontSize: 13 }}>{g === 'boy' ? t.boy : t.girl}</T>
+              </PressableScale>
+            ))}
+          </View>
+        ) : null}
         <PressableScale
           accessibilityRole="button"
           onPress={openMouth}

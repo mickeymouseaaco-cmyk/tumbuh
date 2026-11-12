@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 import Animated, {
   Easing,
   ReduceMotion,
@@ -18,6 +18,46 @@ import { motion, useTheme } from '@/theme';
 const UPPER = ['U-k-R', 'U-l-R', 'U-c-R', 'U-c-L', 'U-l-L', 'U-k-L'];
 const LOWER = ['L-k-R', 'L-l-R', 'L-c-R', 'L-c-L', 'L-l-L', 'L-k-L'];
 const MOUTH = 'M58 110 Q80 105 102 110 Q100 134 80 135 Q60 134 58 110 Z';
+
+export type Gender = '' | 'boy' | 'girl';
+
+/** Animated baby portraits (smile → big laugh), cropped square; shown through a circular mask. */
+export const PORTRAIT = {
+  boy: require('../../assets/images/baby-boy.gif'),
+  girl: require('../../assets/images/baby-girl.gif'),
+  boyStill: require('../../assets/images/baby-boy.png'),
+  girlStill: require('../../assets/images/baby-girl.png'),
+};
+/** Where the portrait's mouth is (fraction of the portrait from its centre) and its rough width. */
+export const PORTRAIT_MOUTH = { x: 0.041, y: 0.162, w: 0.1 };
+/** How far the portrait sits inside the 20-bead ring on every side. */
+export const PORTRAIT_INSET = 24;
+
+/** The chosen baby in a soft glowing circle. With no choice yet, boy and girl gently take turns. */
+export function BabyPortrait({ gender, size, still = false }: { gender: Gender; size: number; still?: boolean }) {
+  const reduce = useReducedMotion();
+  const mix = useSharedValue(0); // 0 = boy, 1 = girl (only used before a choice is made)
+  useEffect(() => {
+    if (gender || reduce) return;
+    mix.value = withRepeat(withSequence(withTiming(0, { duration: 2600 }), withTiming(1, { duration: 700 }), withTiming(1, { duration: 2600 }), withTiming(0, { duration: 700 })), -1);
+  }, [gender, reduce, mix]);
+  const girlFade = useAnimatedStyle(() => ({ opacity: mix.value }));
+  const img = (g: 'boy' | 'girl') => (
+    <Image source={still ? PORTRAIT[`${g}Still`] : PORTRAIT[g]} style={{ width: size, height: size }} resizeMode="cover" accessibilityIgnoresInvertColors />
+  );
+  return (
+    <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', borderWidth: 2, borderColor: 'rgba(255,255,255,0.18)', backgroundColor: '#1B1660', boxShadow: '0 0 30px rgba(109,91,255,0.55)' }}>
+      {gender ? (
+        img(gender)
+      ) : (
+        <>
+          {img('boy')}
+          <Animated.View style={[{ position: 'absolute', top: 0, left: 0 }, girlFade]}>{img('girl')}</Animated.View>
+        </>
+      )}
+    </View>
+  );
+}
 
 /** Where the mouth sits inside the head drawing, as a fraction of its size from the centre. */
 export const MOUTH_OFFSET = { x: 0, y: 40 / 160 };
@@ -113,7 +153,7 @@ function Bead({ on, x, y }: { on: boolean; x: number; y: number }) {
  * The hologram: baby head floating in a slowly turning orbit with 20 beads (one per baby tooth).
  * `float` bobs the head gently; both loops stop when Reduce Motion is on.
  */
-export function TeethHalo({ erupted, age, size = 200, float = true }: { erupted: Record<string, boolean>; age?: number; size?: number; float?: boolean }) {
+export function TeethHalo({ erupted, gender = '', size = 200, float = true }: { erupted: Record<string, boolean>; age?: number; gender?: Gender; size?: number; float?: boolean }) {
   const { c } = useTheme();
   const reduce = useReducedMotion();
   const count = Object.keys(erupted).length;
@@ -141,7 +181,7 @@ export function TeethHalo({ erupted, age, size = 200, float = true }: { erupted:
         return <Bead key={i} on={i < count} x={size / 2 + r * Math.cos(a)} y={size / 2 + r * Math.sin(a)} />;
       })}
       <Animated.View style={head}>
-        <BabyHead size={size - 56} erupted={erupted} age={age} />
+        <BabyPortrait gender={gender} size={size - PORTRAIT_INSET * 2} />
       </Animated.View>
     </View>
   );
