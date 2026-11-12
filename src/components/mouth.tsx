@@ -75,7 +75,11 @@ function Crown({ kind, status, s }: { kind: Kind; status: Status; s: number }) {
           <Path d={crownPath(kind)} transform="scale(0.46)" fill={c.enamel} opacity={0.95} />
         </G>
       ) : (
-        <Ellipse rx={w * 0.42} ry={d * 0.36} fill={c.gumHi} opacity={0.28} />
+        // still under the gum: a darker tooth-shaped shadow, so it never reads as plain gum
+        <G>
+          <Path d={crownPath(kind)} transform="scale(0.86)" fill={c.palateDeep} opacity={0.55} />
+          <Path d={crownPath(kind)} transform="scale(0.86)" fill="none" stroke={c.gumDeep} strokeWidth={1.1} strokeDasharray="2 1.6" opacity={0.9} />
+        </G>
       )}
     </Svg>
   );

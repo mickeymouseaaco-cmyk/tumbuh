@@ -1,4 +1,4 @@
-import { BookOpen, House, ShieldAlert } from 'lucide-react-native';
+import { BookOpen, House, TriangleAlert } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -31,7 +31,9 @@ export function TabBar({ state, navigation }: Props) {
   const labels: Record<string, string> = { index: t.tabHome, teeth: t.tabTeeth, learn: t.tabLearn, problems: t.tabProblems };
 
   return (
-    <View style={{ pointerEvents: 'box-none', position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: Math.max(insets.bottom, 12), paddingHorizontal: 16, alignItems: 'center' }}>
+    // The frame is exactly the bar's size (no transparent strip), so nothing needs special touch rules.
+    // pointerEvents 'box-none' is avoided on purpose: Safari treats it as 'none' for the buttons too.
+    <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom, 12), alignItems: 'center', zIndex: 100, elevation: 100 }}>
       <View
         onLayout={(e) => setW(e.nativeEvent.layout.width - 12)}
         style={{
@@ -57,7 +59,7 @@ export function TabBar({ state, navigation }: Props) {
             route.name === 'index' ? <House size={22} color={color} strokeWidth={focused ? 2.2 : 1.8} /> :
             route.name === 'teeth' ? <ToothIcon size={23} color={color} strokeWidth={focused ? 2.1 : 1.8} /> :
             route.name === 'learn' ? <BookOpen size={22} color={color} strokeWidth={focused ? 2.2 : 1.8} /> :
-            <ShieldAlert size={22} color={color} strokeWidth={focused ? 2.2 : 1.8} />;
+            <TriangleAlert size={22} color={color} strokeWidth={focused ? 2.2 : 1.8} />;
           return (
             <Pressable
               key={route.key}
