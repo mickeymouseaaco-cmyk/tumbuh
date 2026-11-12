@@ -50,7 +50,7 @@ export const strings = {
     learnTitle: 'Belajar',
     learnSub: 'Lihat, faham, buat.',
     probTitle: 'Masalah biasa',
-    probSub: 'Tekan untuk tahu rupanya & apa nak buat.',
+    probSub: 'Leret untuk tukar. Tekan jika sama.',
     urgentTitle: 'Pergi klinik segera jika:',
     looks: 'Rupanya',
     todo: 'Apa nak buat',
@@ -130,7 +130,7 @@ export const strings = {
     learnTitle: 'Learn',
     learnSub: 'Look, get it, do it.',
     probTitle: 'Common problems',
-    probSub: 'Tap to see what it looks like and what to do.',
+    probSub: 'Swipe to flip. Tap if it looks familiar.',
     urgentTitle: 'Get help quickly if:',
     looks: 'What it looks like',
     todo: 'What to do',
@@ -466,7 +466,7 @@ export const learnCards: Record<string, LearnCard[]> = {
   fluoride: [
     { v: 'paste', tag: 'do', bm: 'Saiz ubat gigi', en: 'How much paste' },
     { v: 'ppm', tag: 'do', bm: 'Pilih berfluorida', en: 'Choose fluoride' },
-    { v: 'spit', tag: 'dont', bm: 'Ludah, jangan bilas', en: "Spit, don't rinse" },
+    { v: 'spit', tag: 'do', bm: 'Ludah, jangan bilas', en: "Spit, don't rinse" },
     { v: 'varnish', tag: 'do', bm: 'Sapuan fluorida di klinik', en: 'Fluoride varnish at clinic' },
     { v: 'reach', bm: 'Simpan jauh dari anak', en: 'Keep out of reach' },
   ],
@@ -493,3 +493,12 @@ export const learnCards: Record<string, LearnCard[]> = {
     { v: 'kind', tag: 'do', bm: 'Guna kata positif', en: 'Use kind words' },
   ],
 };
+
+/* ---------- Masalah as Smart Stacks (two per row) ---------- */
+
+export const problemStacks: { id: string; bm: string; en: string; items: string[] }[] = [
+  { id: 'teeth', bm: 'Gigi', en: 'Teeth', items: ['ecc', 'colour', 'late', 'gaps'] },
+  { id: 'newborn', bm: 'Bayi baru lahir', en: 'Newborn', items: ['natal', 'pearls', 'tie'] },
+  { id: 'mouth', bm: 'Gusi & mulut', en: 'Gums & mouth', items: ['thrush', 'cyst'] },
+  { id: 'habits', bm: 'Jatuh & tabiat', en: 'Falls & habits', items: ['injury', 'suck', 'grind'] },
+];
