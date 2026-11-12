@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, ClipPath, Defs, Ellipse, G, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { hairFor } from '@/lib/art';
 import { motion, useTheme } from '@/theme';
 
 const UPPER = ['U-k-R', 'U-l-R', 'U-c-R', 'U-c-L', 'U-l-L', 'U-k-L'];
@@ -22,7 +23,7 @@ const MOUTH = 'M58 110 Q80 105 102 110 Q100 134 80 135 Q60 134 58 110 Z';
 export const MOUTH_OFFSET = { x: 0, y: 40 / 160 };
 
 /** "Si Kecil": a softly shaded baby whose open smile shows the front teeth you've marked. */
-export function BabyHead({ size = 140, erupted }: { size?: number; erupted: Record<string, boolean> }) {
+export function BabyHead({ size = 140, erupted, age = 9 }: { size?: number; erupted: Record<string, boolean>; age?: number }) {
   const slot = (i: number) => 64.5 + i * 5.4;
   return (
     <Svg width={size} height={size} viewBox="0 0 160 160">
@@ -54,8 +55,14 @@ export function BabyHead({ size = 140, erupted }: { size?: number; erupted: Reco
       <Ellipse cx={134} cy={93} rx={6} ry={8.5} fill="url(#ear)" />
       <Circle cx={80} cy={86} r={57} fill="url(#skin)" />
       <Ellipse cx={62} cy={52} rx={16} ry={9} fill="#FFFFFF" opacity={0.28} transform="rotate(-20 62 52)" />
-      <Path d="M74 33 C70 19 88 13 92 25 C94 32 84 35 84 28" stroke="#4A2E25" strokeWidth={4.5} strokeLinecap="round" fill="none" />
-      <Path d="M66 33 C64 26 68 22 72 24" stroke="#4A2E25" strokeWidth={3} strokeLinecap="round" fill="none" opacity={0.8} />
+      {/* hair grows with age */}
+      {hairFor(age).map((h) =>
+        h.fill ? (
+          <Path key={h.d} d={h.d} fill="#4A2E25" />
+        ) : (
+          <Path key={h.d} d={h.d} stroke="#4A2E25" strokeWidth={h.width ?? 2} strokeLinecap="round" fill="none" opacity={h.opacity ?? 1} />
+        ),
+      )}
       <Path d="M50 70 q8 -4 16 0" stroke="#C98A6E" strokeWidth={2} strokeLinecap="round" fill="none" opacity={0.6} />
       <Path d="M94 70 q8 -4 16 0" stroke="#C98A6E" strokeWidth={2} strokeLinecap="round" fill="none" opacity={0.6} />
       <Path d="M49 84 q9 -9 18 0" stroke="#2B2235" strokeWidth={3.6} strokeLinecap="round" fill="none" />
@@ -106,7 +113,7 @@ function Bead({ on, x, y }: { on: boolean; x: number; y: number }) {
  * The hologram: baby head floating in a slowly turning orbit with 20 beads (one per baby tooth).
  * `float` bobs the head gently; both loops stop when Reduce Motion is on.
  */
-export function TeethHalo({ erupted, size = 200, float = true }: { erupted: Record<string, boolean>; size?: number; float?: boolean }) {
+export function TeethHalo({ erupted, age, size = 200, float = true }: { erupted: Record<string, boolean>; age?: number; size?: number; float?: boolean }) {
   const { c } = useTheme();
   const reduce = useReducedMotion();
   const count = Object.keys(erupted).length;
@@ -134,7 +141,7 @@ export function TeethHalo({ erupted, size = 200, float = true }: { erupted: Reco
         return <Bead key={i} on={i < count} x={size / 2 + r * Math.cos(a)} y={size / 2 + r * Math.sin(a)} />;
       })}
       <Animated.View style={head}>
-        <BabyHead size={size - 56} erupted={erupted} />
+        <BabyHead size={size - 56} erupted={erupted} age={age} />
       </Animated.View>
     </View>
   );

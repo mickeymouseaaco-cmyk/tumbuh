@@ -109,7 +109,7 @@ export default function Home() {
           onPress={openMouth}
           style={{ alignItems: 'center' }}>
           <View ref={haloRef} collapsable={false}>
-            <TeethHalo erupted={erupted} size={HALO} />
+            <TeethHalo erupted={erupted} age={age} size={HALO} />
           </View>
         </Pressable>
         <PressableScale

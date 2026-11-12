@@ -1,10 +1,20 @@
-import { Apple, Baby, Droplets, ShieldCheck, Stethoscope } from 'lucide-react-native';
+import Svg, { Path } from 'react-native-svg';
 
+import { topicArt } from '@/lib/art';
+
+/** Hand-drawn topic icons: toothbrush, toothpaste, baby bottle, teether, dental mirror. */
+export function ArtIcon({ id, color, size = 24 }: { id: string; color: string; size?: number }) {
+  const art = topicArt[id] ?? topicArt.clean;
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {art.map((s) => (
+        <Path key={s.d} d={s.d} stroke={color} strokeWidth={s.width ?? 1.8} strokeLinecap="round" strokeLinejoin="round" opacity={s.opacity ?? 1} fill="none" />
+      ))}
+    </Svg>
+  );
+}
+
+/** Kept for older callers: the topic's own icon. */
 export function TopicIcon({ name, color, size = 24 }: { name: string; color: string; size?: number }) {
-  const p = { color, size, strokeWidth: 2 };
-  if (name === 'droplets') return <Droplets {...p} />;
-  if (name === 'shield') return <ShieldCheck {...p} />;
-  if (name === 'apple') return <Apple {...p} />;
-  if (name === 'baby') return <Baby {...p} />;
-  return <Stethoscope {...p} />;
+  return <ArtIcon id={name} color={color} size={size} />;
 }

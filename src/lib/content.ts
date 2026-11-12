@@ -35,7 +35,7 @@ export const strings = {
     visitBody:
       'Bawa anak jumpa doktor gigi bila gigi pertama keluar, atau sebelum hari jadi pertama. Lepas itu setiap 6 bulan.',
     teethTitle: 'Carta gigi susu',
-    teethSub: 'Tekan gigi untuk lihat bila ia biasanya tumbuh.',
+    teethSub: 'Tekan gigi untuk tanda.',
     upper: 'Atas',
     lower: 'Bawah',
     legIn: 'Sudah tumbuh',
@@ -44,10 +44,11 @@ export const strings = {
     usually: 'Biasanya tumbuh:',
     markIn: 'Tandakan sudah tumbuh',
     markOut: 'Tandakan belum tumbuh',
-    orderTitle: 'Susunan biasa gigi tumbuh',
+    orderTitle: 'Bila gigi tumbuh?',
+    chartNote: 'Awal atau lambat beberapa bulan itu normal.',
     factsTitle: 'Perlu tahu',
     learnTitle: 'Belajar',
-    learnSub: 'Panduan ringkas jaga gigi & mulut anak.',
+    learnSub: 'Lihat, faham, buat.',
     probTitle: 'Masalah biasa',
     probSub: 'Tekan untuk tahu rupanya & apa nak buat.',
     urgentTitle: 'Pergi klinik segera jika:',
@@ -114,7 +115,7 @@ export const strings = {
     visitBody:
       'Book a check-up when the first tooth appears, or by the first birthday. After that, every 6 months.',
     teethTitle: 'Baby teeth chart',
-    teethSub: 'Tap a tooth to see when it usually comes in.',
+    teethSub: 'Tap a tooth to mark it.',
     upper: 'Upper',
     lower: 'Lower',
     legIn: 'In',
@@ -123,10 +124,11 @@ export const strings = {
     usually: 'Usually appears:',
     markIn: 'Mark as in',
     markOut: 'Mark as not in yet',
-    orderTitle: 'Usual order',
+    orderTitle: 'When do teeth come in?',
+    chartNote: 'A few months early or late is normal.',
     factsTitle: 'Good to know',
     learnTitle: 'Learn',
-    learnSub: "Simple guides to your child's teeth and mouth.",
+    learnSub: 'Look, get it, do it.',
     probTitle: 'Common problems',
     probSub: 'Tap to see what it looks like and what to do.',
     urgentTitle: 'Get help quickly if:',
@@ -255,11 +257,11 @@ export type LearnSection = { title: string; items: { title: string; points: stri
 
 /** Learn topics, same order as `learn[lang]`. Icon names map to lucide icons in the Learn screen. */
 export const topicMeta = [
-  { id: 'clean', icon: 'droplets', tint: 'sky', blurb: { bm: 'Lap gusi, berus gigi, cara mudah', en: 'Wiping gums, brushing, easy tricks' } },
-  { id: 'fluoride', icon: 'shield', tint: 'mint', blurb: { bm: 'Berapa banyak & kenapa penting', en: 'How much, and why it matters' } },
-  { id: 'food', icon: 'apple', tint: 'peach', blurb: { bm: 'Botol, gula & kuman', en: 'Bottles, sugar and germs' } },
-  { id: 'teething', icon: 'baby', tint: 'lilac', blurb: { bm: 'Tanda, cara legakan, elakkan', en: 'Signs, soothing, what to avoid' } },
-  { id: 'dentist', icon: 'stethoscope', tint: 'butter', blurb: { bm: 'Bila pergi & apa berlaku', en: 'When to go and what happens' } },
+  { id: 'clean', icon: 'clean', tint: 'sky', blurb: { bm: 'Lap gusi, berus gigi, cara mudah', en: 'Wiping gums, brushing, easy tricks' } },
+  { id: 'fluoride', icon: 'fluoride', tint: 'mint', blurb: { bm: 'Berapa banyak & kenapa penting', en: 'How much, and why it matters' } },
+  { id: 'food', icon: 'food', tint: 'peach', blurb: { bm: 'Botol, gula & kuman', en: 'Bottles, sugar and germs' } },
+  { id: 'teething', icon: 'teething', tint: 'lilac', blurb: { bm: 'Tanda, cara legakan, elakkan', en: 'Signs, soothing, what to avoid' } },
+  { id: 'dentist', icon: 'dentist', tint: 'butter', blurb: { bm: 'Bila pergi & apa berlaku', en: 'When to go and what happens' } },
 ] as const;
 
 export const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
@@ -446,3 +448,48 @@ export const problems: Problem[] = [
     todo: { bm: 'Normal dan sebenarnya bagus — ia beri ruang untuk gigi kekal yang lebih besar nanti.', en: 'Normal and actually good — it leaves room for the bigger adult teeth later.' },
   },
 ];
+
+/* ---------- Learn as picture cards: one visual + a few words each ---------- */
+
+export type CardTag = 'do' | 'dont' | 'warn';
+export type LearnCard = { v: string; tag?: CardTag; bm: string; en: string };
+
+export const learnCards: Record<string, LearnCard[]> = {
+  clean: [
+    { v: 'wipe', tag: 'do', bm: '0–6 bln: lap gusi', en: '0–6 mo: wipe gums' },
+    { v: 'brush', tag: 'do', bm: 'Gigi keluar? Berus', en: 'First tooth? Brush' },
+    { v: 'daynight', tag: 'do', bm: 'Pagi & sebelum tidur', en: 'Morning & bedtime' },
+    { v: 'lap', bm: 'Baring di riba', en: 'Lay on your lap' },
+    { v: 'newbrush', bm: 'Berus baru tiap 3 bln', en: 'New brush every 3 mo' },
+    { v: 'parent', bm: 'Ibu bapa berus hingga 7–8 thn', en: 'You brush until 7–8' },
+  ],
+  fluoride: [
+    { v: 'paste', tag: 'do', bm: 'Saiz ubat gigi', en: 'How much paste' },
+    { v: 'ppm', tag: 'do', bm: 'Pilih berfluorida', en: 'Choose fluoride' },
+    { v: 'spit', tag: 'dont', bm: 'Ludah, jangan bilas', en: "Spit, don't rinse" },
+    { v: 'varnish', tag: 'do', bm: 'Sapuan fluorida di klinik', en: 'Fluoride varnish at clinic' },
+    { v: 'reach', bm: 'Simpan jauh dari anak', en: 'Keep out of reach' },
+  ],
+  food: [
+    { v: 'bedbottle', tag: 'dont', bm: 'Jangan tidur dengan botol', en: 'No bottle in bed' },
+    { v: 'cup', tag: 'do', bm: 'Cawan dari 6 bulan', en: 'Cup from 6 months' },
+    { v: 'sweet', tag: 'dont', bm: 'Elak air manis', en: 'Skip sweet drinks' },
+    { v: 'water', tag: 'do', bm: 'Air kosong & susu', en: 'Water & milk' },
+    { v: 'honey', tag: 'dont', bm: 'Tiada madu bawah 1 thn', en: 'No honey under 1' },
+    { v: 'spoon', tag: 'dont', bm: 'Jangan kongsi sudu', en: "Don't share spoons" },
+  ],
+  teething: [
+    { v: 'signs', bm: 'Air liur, gigit, meragam', en: 'Drool, chewing, fussy' },
+    { v: 'fever', tag: 'warn', bm: 'Demam 38°C? Jumpa doktor', en: '38°C fever? See a doctor' },
+    { v: 'finger', tag: 'do', bm: 'Urut gusi dengan jari', en: 'Rub gums with a finger' },
+    { v: 'teether', tag: 'do', bm: 'Gelang gigit sejuk', en: 'Chilled teether' },
+    { v: 'gel', tag: 'dont', bm: 'Elak gel bius', en: 'No numbing gels' },
+    { v: 'amber', tag: 'dont', bm: 'Tiada rantai ambar', en: 'No amber necklaces' },
+  ],
+  dentist: [
+    { v: 'firstvisit', tag: 'do', bm: 'Gigi pertama atau umur 1', en: 'First tooth or age 1' },
+    { v: 'sixmonths', tag: 'do', bm: 'Setiap 6 bulan', en: 'Every 6 months' },
+    { v: 'quick', bm: 'Cepat & tak sakit', en: 'Quick & painless' },
+    { v: 'kind', tag: 'do', bm: 'Guna kata positif', en: 'Use kind words' },
+  ],
+};

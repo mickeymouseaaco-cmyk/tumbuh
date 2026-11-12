@@ -73,7 +73,7 @@ export default function Welcome() {
             {step === 0 ? (
               <Animated.View key="s0" entering={entering} exiting={FadeOut.duration(140)} style={{ gap: 24 }}>
                 <Animated.View entering={FadeIn.duration(600)} style={{ alignSelf: 'center' }}>
-                  <TeethHalo erupted={DEMO} size={200} />
+                  <TeethHalo erupted={DEMO} age={age} size={200} />
                 </Animated.View>
                 <View style={{ gap: 10 }}>
                   <Display style={{ fontSize: 34, lineHeight: 40, textAlign: 'center' }}>{t.welcomeTitle}</Display>
