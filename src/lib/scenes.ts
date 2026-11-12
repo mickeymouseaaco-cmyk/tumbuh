@@ -6,32 +6,45 @@
  * finger wiping gums, a child spitting into the sink, the dentist's gloved hand with a mirror.
  */
 import { parts, type Part } from './cartoons';
-import { adultFace, baby, childReach, gloveGrip, handCloth, handGrip, handPoint } from './people';
+import { INK, adultFace, baby, childReach, gloveGrip, handCloth, handGrip, handPoint } from './people';
+
+/** Give an object the same dark outline as the characters (skips highlights, text and already-stroked shapes). */
+function outlined(p: Part, w = 1.3): Part {
+  const xml = p.xml.replace(/<(path|rect|circle|ellipse)\b([^>]*?)(\/?)>/g, (m, tag: string, attrs: string, close: string) => {
+    if (/stroke=/.test(attrs) || /opacity=/.test(attrs) || /fill="none"/.test(attrs) || !/fill=/.test(attrs)) return m;
+    return `<${tag}${attrs} stroke="${INK}" stroke-width="${w}" stroke-linejoin="round"${close}>`;
+  });
+  return { ...p, xml };
+}
+
+const outlinedParts = Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, outlined(v)])) as Record<string, Part>;
 
 export const registry: Record<string, Part> = {
-  ...parts,
-  handGrip: handGrip(),
-  handPoint: handPoint(),
+  ...outlinedParts,
+  handGrip: handGrip('mum'),
+  dadGrip: handGrip('dad'),
+  handPoint: handPoint('mum'),
   handCloth: handCloth(),
   gloveGrip: gloveGrip(),
   childReach: childReach(),
   adultFace: adultFace(),
+  // the same baby everywhere (mint onesie, white collar, tooth logo), in different moments
   babyWide: baby({ age: 10, mouth: 'wide', teeth: ['U1', 'L1', 'L2'] }),
   babyGums: baby({ age: 3, mouth: 'open' }),
   babyOpen7: baby({ age: 7, mouth: 'open', teeth: ['L1'] }),
-  babyBig: baby({ age: 30, mouth: 'wide', teeth: ['U1', 'U2', 'L1', 'L2'], onesie: '#60A5FA' }),
-  babySpit: baby({ age: 30, mouth: 'open', teeth: ['U1', 'U2', 'L1', 'L2'], onesie: '#60A5FA' }),
+  babyBig: baby({ age: 30, mouth: 'wide', teeth: ['U1', 'U2', 'L1', 'L2'] }),
+  babySpit: baby({ age: 30, mouth: 'open', teeth: ['U1', 'U2', 'L1', 'L2'] }),
   babyChew: baby({ age: 6, mouth: 'chew', drool: true }),
   babyTeether: baby({ age: 7, mouth: 'chew', teeth: ['L1'] }),
-  babyFever: baby({ age: 9, mouth: 'smile', flushed: true }),
-  babySmile: baby({ age: 10, mouth: 'smile', onesie: '#A7F3D0' }),
-  babyCup: baby({ age: 8, mouth: 'smile', onesie: '#FDBA74' }),
-  babySleep: baby({ age: 8, mouth: 'smile', eyes: 'closed', onesie: '#C4B5FD' }),
-  babyLap: baby({ age: 9, mouth: 'open', teeth: ['L1'], onesie: '#FDE68A' }),
-  babyOne: baby({ age: 12, mouth: 'open', teeth: ['U1', 'L1'], onesie: '#FCA5A5' }),
-  babyCheck: baby({ age: 12, mouth: 'wide', teeth: ['U1', 'L1', 'L2'], onesie: '#93C5FD' }),
-  babyKind: baby({ age: 10, mouth: 'smile', onesie: '#F9A8D4' }),
-  babySpoon: baby({ age: 8, mouth: 'open', onesie: '#FDE68A' }),
+  babyFever: baby({ age: 9, mouth: 'closed', flushed: true }),
+  babySmile: baby({ age: 10, mouth: 'grin', teeth: ['L1'] }),
+  babyCup: baby({ age: 8, mouth: 'closed' }),
+  babySleep: baby({ age: 8, mouth: 'closed', eyes: 'closed' }),
+  babyLap: baby({ age: 9, mouth: 'open', teeth: ['L1'] }),
+  babyOne: baby({ age: 12, mouth: 'grin', teeth: ['U1', 'L1'] }),
+  babyCheck: baby({ age: 12, mouth: 'wide', teeth: ['U1', 'L1', 'L2'] }),
+  babyKind: baby({ age: 10, mouth: 'grin', teeth: ['L1'], eyes: 'closed' }),
+  babySpoon: baby({ age: 8, mouth: 'open' }),
 };
 
 export type Anim = {
