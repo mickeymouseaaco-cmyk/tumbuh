@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#B26BD8",
+        "backgroundColor": "#0B0A1A",
         "foregroundImage": "./assets/images/icon-foreground.png"
       },
       "package": "app.tumbuh.baby"
