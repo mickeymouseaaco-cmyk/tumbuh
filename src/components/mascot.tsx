@@ -19,11 +19,22 @@ const UPPER = ['U-k-R', 'U-l-R', 'U-c-R', 'U-c-L', 'U-l-L', 'U-k-L'];
 const LOWER = ['L-k-R', 'L-l-R', 'L-c-R', 'L-c-L', 'L-l-L', 'L-k-L'];
 const MOUTH = 'M58 110 Q80 105 102 110 Q100 134 80 135 Q60 134 58 110 Z';
 
+export type Gender = '' | 'boy' | 'girl';
+
+/** The drawn baby inside a soft glowing circle (used for the boy / girl choice). */
+export function BabyPortrait({ gender, size }: { gender: Gender; size: number; still?: boolean }) {
+  return (
+    <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', borderWidth: 2, borderColor: 'rgba(255,255,255,0.18)', backgroundColor: '#1B1660', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(109,91,255,0.5)' }}>
+      <BabyHead size={size * 0.92} erupted={{ 'L-c-R': true, 'L-c-L': true }} age={10} gender={gender} />
+    </View>
+  );
+}
+
 /** Where the mouth sits inside the head drawing, as a fraction of its size from the centre. */
 export const MOUTH_OFFSET = { x: 0, y: 40 / 160 };
 
 /** "Si Kecil": a softly shaded baby whose open smile shows the front teeth you've marked. */
-export function BabyHead({ size = 140, erupted, age = 9 }: { size?: number; erupted: Record<string, boolean>; age?: number }) {
+export function BabyHead({ size = 140, erupted, age = 9, gender = '' }: { size?: number; erupted: Record<string, boolean>; age?: number; gender?: Gender }) {
   const slot = (i: number) => 64.5 + i * 5.4;
   return (
     <Svg width={size} height={size} viewBox="0 0 160 160">
@@ -68,6 +79,19 @@ export function BabyHead({ size = 140, erupted, age = 9 }: { size?: number; erup
       <Path d="M49 84 q9 -9 18 0" stroke="#2B2235" strokeWidth={3.6} strokeLinecap="round" fill="none" />
       <Path d="M93 84 q9 -9 18 0" stroke="#2B2235" strokeWidth={3.6} strokeLinecap="round" fill="none" />
       <Path d="M50 82 l-3 -2 M66 82 l3 -2 M94 82 l-3 -2 M110 82 l3 -2" stroke="#2B2235" strokeWidth={2} strokeLinecap="round" />
+      {gender === 'girl' ? (
+        <G>
+          {/* longer lashes */}
+          <Path d="M48 80 l-4 -3.5 M51 77 l-2.5 -4 M109 77 l2.5 -4 M112 80 l4 -3.5" stroke="#2B2235" strokeWidth={2} strokeLinecap="round" />
+          {/* flower hair clip */}
+          <G transform="translate(108 44)">
+            {[0, 72, 144, 216, 288].map((r) => (
+              <Ellipse key={r} cx={0} cy={-6.5} rx={4.6} ry={6} fill="#C4B5FD" stroke="#8B7BE0" strokeWidth={1} transform={`rotate(${r})`} />
+            ))}
+            <Circle cx={0} cy={0} r={3.6} fill="#FDE68A" stroke="#E0B53A" strokeWidth={1} />
+          </G>
+        </G>
+      ) : null}
       <Ellipse cx={80} cy={97} rx={5} ry={3.2} fill="#E9A07F" opacity={0.7} />
       <Ellipse cx={44} cy={102} rx={13} ry={9} fill="url(#blush)" />
       <Ellipse cx={116} cy={102} rx={13} ry={9} fill="url(#blush)" />
@@ -113,7 +137,7 @@ function Bead({ on, x, y }: { on: boolean; x: number; y: number }) {
  * The hologram: baby head floating in a slowly turning orbit with 20 beads (one per baby tooth).
  * `float` bobs the head gently; both loops stop when Reduce Motion is on.
  */
-export function TeethHalo({ erupted, age, size = 200, float = true }: { erupted: Record<string, boolean>; age?: number; size?: number; float?: boolean }) {
+export function TeethHalo({ erupted, age, gender = '', size = 200, float = true }: { erupted: Record<string, boolean>; age?: number; gender?: Gender; size?: number; float?: boolean }) {
   const { c } = useTheme();
   const reduce = useReducedMotion();
   const count = Object.keys(erupted).length;
@@ -141,7 +165,7 @@ export function TeethHalo({ erupted, age, size = 200, float = true }: { erupted:
         return <Bead key={i} on={i < count} x={size / 2 + r * Math.cos(a)} y={size / 2 + r * Math.sin(a)} />;
       })}
       <Animated.View style={head}>
-        <BabyHead size={size - 56} erupted={erupted} age={age} />
+        <BabyHead size={size - 56} erupted={erupted} age={age} gender={gender} />
       </Animated.View>
     </View>
   );

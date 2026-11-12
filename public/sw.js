@@ -1,5 +1,5 @@
 /* Tumbuh service worker: quick, offline-friendly start-up. */
-const CACHE = 'tumbuh-v13';
+const CACHE = 'tumbuh-v15';
 const SHELL = ['/', '/manifest.json', '/icons/icon-192.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {

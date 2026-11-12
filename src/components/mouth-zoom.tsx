@@ -24,7 +24,7 @@ export type HeadRect = { x: number; y: number; size: number };
  */
 export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClose: () => void }) {
   const { c } = useTheme();
-  const { t, name, erupted, age } = useStore();
+  const { t, name, gender, erupted, age } = useStore();
   const { width: W, height: H } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
@@ -78,7 +78,7 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.bg }, roomStyle]} />
 
         <Animated.View style={[{ position: 'absolute', left: o.x, top: o.y, width: o.size, height: o.size }, headStyle]}>
-          <BabyHead size={o.size} erupted={erupted} age={age} />
+          <BabyHead size={o.size} erupted={erupted} age={age} gender={gender} />
         </Animated.View>
 
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, cavityStyle]}>
