@@ -16,7 +16,7 @@ type Props = {
 
 /** Floating pill tab bar. A soft bubble slides to the active tab (short, ease-out: tabs are frequent). */
 export function TabBar({ state, navigation }: Props) {
-  const { c, dark } = useTheme();
+  const { c } = useTheme();
   const { t } = useStore();
   const insets = useSafeAreaInsets();
   const [w, setW] = useState(0);
@@ -40,14 +40,14 @@ export function TabBar({ state, navigation }: Props) {
           flexDirection: 'row',
           padding: 6,
           borderRadius: radius.pill,
-          backgroundColor: c.surface,
-          borderWidth: dark ? 1 : 0,
+          backgroundColor: c.surfaceSolid,
+          borderWidth: 1,
           borderColor: c.border,
-          boxShadow: `0 10px 30px ${c.shadow}`,
+          boxShadow: `0 18px 40px ${c.shadow}`,
         }}>
         {w > 0 ? (
           <Animated.View
-            style={[{ position: 'absolute', top: 6, left: 6, bottom: 6, width: item, borderRadius: radius.pill, backgroundColor: c.accentSoft }, bubble]}
+            style={[{ position: 'absolute', top: 6, left: 6, bottom: 6, width: item, borderRadius: radius.pill, backgroundColor: c.accentSoft, borderWidth: 1, borderColor: 'rgba(255,122,176,0.45)', boxShadow: `0 0 18px ${c.glow}` }, bubble]}
           />
         ) : null}
         {state.routes.map((route, i) => {

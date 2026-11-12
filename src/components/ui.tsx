@@ -18,7 +18,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
@@ -122,7 +122,8 @@ export function Button({
       onPress={onPress}
       style={[
         { minHeight: 54, paddingHorizontal: 24, borderRadius: radius.pill, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' },
-        kind === 'primary' && { boxShadow: `0 8px 20px ${c.accent}40` },
+        kind === 'primary' && { boxShadow: `0 0 28px ${c.glow}, 0 0 0 1px rgba(255,255,255,0.25) inset` },
+        kind !== 'primary' && { borderWidth: 1, borderColor: c.border },
         style,
       ]}>
       <T style={{ fontFamily: fonts.semi, fontSize: 16, color: fg }}>{label}</T>
@@ -136,7 +137,7 @@ export function Button({
 export const enter = (i: number) => FadeInDown.duration(motion.enter).delay(i * motion.stagger);
 
 export function Card({ children, style, index }: { children: ReactNode; style?: StyleProp<ViewStyle>; index?: number }) {
-  const { c, dark } = useTheme();
+  const { c } = useTheme();
   return (
     <Animated.View
       entering={index === undefined ? undefined : enter(index)}
@@ -146,9 +147,9 @@ export function Card({ children, style, index }: { children: ReactNode; style?: 
           borderRadius: radius.card,
           borderCurve: 'continuous',
           padding: 20,
-          borderWidth: dark ? 1 : 0,
+          borderWidth: 1,
           borderColor: c.border,
-          boxShadow: dark ? undefined : `0 6px 24px ${c.shadow}`,
+          boxShadow: `0 16px 40px ${c.shadow}`,
         },
         style,
       ]}>
@@ -166,10 +167,10 @@ export function LangSwitch() {
   }, [lang, x]);
   const knob = useAnimatedStyle(() => ({ transform: [{ translateX: x.value * 48 }] }));
   return (
-    <View accessibilityRole="radiogroup" accessibilityLabel="Language" style={{ flexDirection: 'row', padding: 4, borderRadius: radius.pill, backgroundColor: c.track }}>
+    <View accessibilityRole="radiogroup" accessibilityLabel="Language" style={{ flexDirection: 'row', padding: 4, borderRadius: radius.pill, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
       <Animated.View
         style={[
-          { position: 'absolute', top: 4, left: 4, width: 48, height: 36, borderRadius: radius.pill, backgroundColor: c.surface, boxShadow: `0 2px 6px ${c.shadow}` },
+          { position: 'absolute', top: 4, left: 4, width: 48, height: 36, borderRadius: radius.pill, backgroundColor: c.accentSoft, borderWidth: 1, borderColor: c.accent, boxShadow: `0 0 14px ${c.glow}` },
           knob,
         ]}
       />
@@ -185,7 +186,7 @@ export function LangSwitch() {
               setLang(l);
             }}
             style={{ width: 48, height: 36, alignItems: 'center', justifyContent: 'center' }}>
-            <T style={{ fontFamily: fonts.bold, fontSize: 13, color: on ? c.text : c.textMuted }}>{l.toUpperCase()}</T>
+            <T style={{ fontFamily: fonts.bold, fontSize: 13, color: on ? c.accentText : c.textMuted }}>{l.toUpperCase()}</T>
           </Pressable>
         );
       })}
@@ -198,17 +199,19 @@ export function Screen({ title, subtitle, eyebrow, children }: { title: string; 
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   return (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <Aurora />
     <ScrollView
-      style={{ flex: 1, backgroundColor: c.bg }}
+      style={{ flex: 1 }}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 120, paddingHorizontal: 20 }}>
       <View style={{ width: '100%', maxWidth: 560, alignSelf: 'center', gap: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 36, height: 36, borderRadius: 12, borderCurve: 'continuous', backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: 36, height: 36, borderRadius: 12, borderCurve: 'continuous', backgroundColor: c.accentSoft, borderWidth: 1, borderColor: c.accent, boxShadow: `0 0 16px ${c.glow}`, alignItems: 'center', justifyContent: 'center' }}>
               <ToothIcon size={20} fill={c.enamel} />
             </View>
-            <T style={{ fontFamily: fonts.displayBold, fontSize: 20, color: c.accentText }}>tumbuh</T>
+            <T style={{ fontFamily: fonts.displayBold, fontSize: 20, letterSpacing: 0.5, color: c.text }}>tumbuh<T style={{ fontFamily: fonts.displayBold, fontSize: 20, color: c.accent }}>.</T></T>
           </View>
           <LangSwitch />
         </View>
@@ -220,6 +223,35 @@ export function Screen({ title, subtitle, eyebrow, children }: { title: string; 
         {children}
       </View>
     </ScrollView>
+    </View>
+  );
+}
+
+/** Soft aurora glows behind every screen. Static (no motion), drawn once. */
+export function Aurora() {
+  const { c } = useTheme();
+  return (
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
+      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <Defs>
+          <RadialGradient id="aA" cx="10" cy="4" r="60" gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor={c.auroraA} stopOpacity="0.42" />
+            <Stop offset="1" stopColor={c.auroraA} stopOpacity="0" />
+          </RadialGradient>
+          <RadialGradient id="aB" cx="100" cy="30" r="55" gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor={c.auroraB} stopOpacity="0.18" />
+            <Stop offset="1" stopColor={c.auroraB} stopOpacity="0" />
+          </RadialGradient>
+          <RadialGradient id="aC" cx="30" cy="100" r="60" gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor={c.auroraC} stopOpacity="0.20" />
+            <Stop offset="1" stopColor={c.auroraC} stopOpacity="0" />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100" height="100" fill="url(#aA)" />
+        <Rect x="0" y="0" width="100" height="100" fill="url(#aB)" />
+        <Rect x="0" y="0" width="100" height="100" fill="url(#aC)" />
+      </Svg>
+    </View>
   );
 }
 

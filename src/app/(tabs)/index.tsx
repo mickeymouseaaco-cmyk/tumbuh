@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
-import { ArrowRight, CalendarHeart, Check, Lightbulb, Minus, PartyPopper, Plus } from 'lucide-react-native';
-import { useEffect } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ArrowRight, CalendarHeart, Check, Lightbulb, Minus, PartyPopper, Plus, ZoomIn } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -9,12 +9,15 @@ import Animated, {
   LinearTransition,
   ReduceMotion,
   useAnimatedStyle,
+  useReducedMotion,
+  withRepeat,
   useSharedValue,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
 
 import { TeethHalo } from '@/components/mascot';
+import { MouthZoom, type HeadRect } from '@/components/mouth-zoom';
 import { Card, Display, Eyebrow, H2, PressableScale, Screen, T, ToothIcon, enter } from '@/components/ui';
 import { checklist, fill, tipFor } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
@@ -25,6 +28,20 @@ import { fonts, motion, radius, tint, useTheme } from '@/theme';
 function greeting(t: { morning: string; noon: string; evening: string; night: string }) {
   const h = new Date().getHours();
   return h < 12 ? t.morning : h < 15 ? t.noon : h < 19 ? t.evening : t.night;
+}
+
+const HALO = 210;
+
+/** A small breathing dot that invites a tap. Still when Reduce Motion is on. */
+function PulseDot() {
+  const { c } = useTheme();
+  const reduce = useReducedMotion();
+  const o = useSharedValue(1);
+  useEffect(() => {
+    if (!reduce) o.value = withRepeat(withSequence(withTiming(0.25, { duration: 900 }), withTiming(1, { duration: 900 })), -1);
+  }, [reduce, o]);
+  const a = useAnimatedStyle(() => ({ opacity: o.value }));
+  return <Animated.View style={[{ width: 7, height: 7, borderRadius: 4, backgroundColor: c.accent, boxShadow: `0 0 8px ${c.glow}` }, a]} />;
 }
 
 function CheckRow({ label, done, onPress }: { label: string; done: boolean; onPress: () => void }) {
@@ -68,7 +85,14 @@ export default function Home() {
   const mint = tint(c, 'mint');
   const butter = tint(c, 'butter');
   const lilac = tint(c, 'lilac');
-  const peach = tint(c, 'peach');
+
+  const haloRef = useRef<View>(null);
+  const [zoom, setZoom] = useState<HeadRect | null>(null);
+  const openMouth = () => {
+    haptic.soft();
+    // The head sits 28px inside the halo on every side.
+    haloRef.current?.measureInWindow((x, y, w) => setZoom({ x: x + 28, y: y + 28, size: w - 56 }));
+  };
 
   const step = (d: number) => {
     haptic.tap();
@@ -77,16 +101,32 @@ export default function Home() {
 
   return (
     <Screen eyebrow={greeting(t)} title={fill(t.teethOf, { name })} subtitle={t.helloSub}>
-      {/* Hero */}
-      <Card index={1} style={{ backgroundColor: peach.bg, alignItems: 'center', gap: 4, paddingTop: 24, boxShadow: undefined }}>
-        <TeethHalo erupted={erupted} size={188} />
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+      {/* Hero: tap the head to fly into the mouth */}
+      <Card index={1} style={{ alignItems: 'center', gap: 6, paddingTop: 22, overflow: 'hidden' }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={fill(t.tapHead, { name })}
+          onPress={openMouth}
+          style={{ alignItems: 'center' }}>
+          <View ref={haloRef} collapsable={false}>
+            <TeethHalo erupted={erupted} size={HALO} />
+          </View>
+        </Pressable>
+        <PressableScale
+          accessibilityRole="button"
+          onPress={openMouth}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.accentSoft, borderWidth: 1, borderColor: 'rgba(255,122,176,0.4)' }}>
+          <PulseDot />
+          <ZoomIn size={15} color={c.accentText} strokeWidth={2.2} />
+          <T style={{ fontSize: 13, fontFamily: fonts.semi, color: c.accentText }}>{fill(t.tapHead, { name })}</T>
+        </PressableScale>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 10 }}>
           <Animated.View key={count} entering={FadeInDown.duration(220)}>
-            <Display style={{ fontSize: 44, lineHeight: 50, color: peach.fg, fontVariant: ['tabular-nums'] }}>{count}</Display>
+            <Display style={{ fontSize: 48, lineHeight: 54, color: c.text, fontVariant: ['tabular-nums'], textShadowColor: c.glow, textShadowRadius: 18 }}>{count}</Display>
           </Animated.View>
-          <T style={{ fontFamily: fonts.semi, color: peach.fg }}>{t.ofTwenty}</T>
+          <T style={{ fontFamily: fonts.semi, color: c.textMuted }}>{t.ofTwenty}</T>
         </View>
-        <View style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, padding: 8, paddingLeft: 18, borderRadius: radius.pill, backgroundColor: c.surface }}>
+        <View style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, padding: 8, paddingLeft: 18, borderRadius: radius.pill, backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border }}>
           <View>
             <T style={{ fontSize: 12, color: c.textMuted }}>{t.ageLabel}</T>
             <T style={{ fontFamily: fonts.bold, fontSize: 17, fontVariant: ['tabular-nums'] }}>
@@ -94,15 +134,16 @@ export default function Home() {
             </T>
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <PressableScale accessibilityRole="button" accessibilityLabel={t.ageDown} onPress={() => step(-1)} style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: c.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-              <Minus size={20} color={c.accentText} strokeWidth={2.4} />
+            <PressableScale accessibilityRole="button" accessibilityLabel={t.ageDown} onPress={() => step(-1)} style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}>
+              <Minus size={20} color={c.text} strokeWidth={2.4} />
             </PressableScale>
-            <PressableScale accessibilityRole="button" accessibilityLabel={t.ageUp} onPress={() => step(1)} style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center' }}>
-              <Plus size={20} color={c.onAccent} strokeWidth={2.4} />
+            <PressableScale accessibilityRole="button" accessibilityLabel={t.ageUp} onPress={() => step(1)} style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: c.accent, boxShadow: `0 0 18px ${c.glow}`, alignItems: 'center', justifyContent: 'center' }}>
+              <Plus size={20} color={c.onAccent} strokeWidth={2.6} />
             </PressableScale>
           </View>
         </View>
       </Card>
+      <MouthZoom origin={zoom} onClose={() => setZoom(null)} />
 
       {/* Coming in now */}
       <Animated.View entering={enter(2)} style={{ gap: 10 }}>

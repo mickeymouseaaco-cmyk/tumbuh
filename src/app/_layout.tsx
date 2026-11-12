@@ -1,4 +1,4 @@
-import { Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
+import { SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
 import {
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
@@ -56,8 +56,8 @@ function Navigator({ fontsReady }: { fontsReady: boolean }) {
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    Fredoka_600SemiBold,
-    Fredoka_700Bold,
+    SpaceGrotesk_600SemiBold,
+    SpaceGrotesk_700Bold,
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,

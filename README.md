@@ -6,12 +6,11 @@ Built with **Expo SDK 58 (React Native, Expo Router)**, the same setup as KiTA. 
 
 ## Look & feel
 
-- Warm cream paper, one raspberry accent, soft pastel colours per topic; automatic **light and dark** themes
-- Rounded **Fredoka** headings with **Plus Jakarta Sans** body text
-- "Si Kecil" mascot whose smile shows the front teeth you've marked, ringed by 20 beads (one per baby tooth)
-- A real gum chart: tooth-shaped teeth that pop in when marked and gently glow while they're due
-- Floating tab bar with a sliding bubble, press feedback on every button and card, gentle entrance animations, haptics on phones
-- Respects the phone's Reduce Motion setting
+- "Night nursery" futurism: deep midnight base with soft aurora glows, frosted-glass cards, one glowing rose accent, Space Grotesk headings with Plus Jakarta Sans body text
+- "Si Kecil": a softly shaded baby head floating in a slowly turning orbit of 20 beads (one per baby tooth); its smile shows the front teeth you've marked
+- **Tap the baby's head → the camera flies into the mouth** and lands on a realistic inside-the-mouth view
+- Inside the mouth: upper arch with palate and ridges, lower arch with tongue, glossy gums, and true-to-shape crowns (thin curved incisors, pointed canines, grooved molars). Due teeth show as swollen, glowing gum with a sliver of tooth breaking through; marked teeth rise out of the gum
+- Floating glass tab bar with a glowing bubble, press feedback everywhere, haptics on phones; Reduce Motion turns the flights and loops into simple fades
 
 ## What's inside
 
