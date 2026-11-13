@@ -13,4 +13,5 @@ import type { ImageSourcePropType } from 'react-native';
 export const problemPhotos: Partial<Record<string, { src: ImageSourcePropType; credit?: string }>> = {
   ecc: { src: require('../../assets/problems/ecc.jpg') },
   colour: { src: require('../../assets/problems/colour.jpg') },
+  late: { src: require('../../assets/problems/late.jpg') },
 };
