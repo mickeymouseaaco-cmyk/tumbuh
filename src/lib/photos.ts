@@ -10,4 +10,6 @@ import type { ImageSourcePropType } from 'react-native';
  * Keys are the problem ids: ecc, colour, late, gaps, natal, pearls, tie, thrush, cyst, injury, suck, grind.
  * A card without a photo shows a soft coloured placeholder.
  */
-export const problemPhotos: Partial<Record<string, { src: ImageSourcePropType; credit?: string }>> = {};
+export const problemPhotos: Partial<Record<string, { src: ImageSourcePropType; credit?: string }>> = {
+  ecc: { src: require('../../assets/problems/ecc.jpg') },
+};
