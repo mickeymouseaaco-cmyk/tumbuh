@@ -16,4 +16,5 @@ export const problemPhotos: Partial<Record<string, { src: ImageSourcePropType; c
   late: { src: require('../../assets/problems/late.jpg') },
   gaps: { src: require('../../assets/problems/gaps.jpg') },
   tie: { src: require('../../assets/problems/tie.jpg') },
+  natal: { src: require('../../assets/problems/natal.jpg') },
 };
