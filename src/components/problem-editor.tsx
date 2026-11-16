@@ -124,7 +124,7 @@ export function ProblemEditor({ stack, editing, onClose }: { stack: string | nul
                 return (
                   <PressableScale key={g} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => setD((x) => ({ ...x, tag: g }))}
                     style={{ minHeight: 40, paddingHorizontal: 14, borderRadius: radius.pill, justifyContent: 'center', backgroundColor: on ? tt.fg : c.surface, borderWidth: 1, borderColor: on ? tt.fg : c.border }}>
-                    <T style={{ fontSize: 13, fontFamily: fonts.semi, color: on ? '#0B0A1A' : c.text }}>{g === 'ok' ? t.fOk : g === 'check' ? t.fCheck : t.fUrgent}</T>
+                    <T style={{ fontSize: 13, fontFamily: fonts.semi, color: on ? c.ink : c.text }}>{g === 'ok' ? t.fOk : g === 'check' ? t.fCheck : t.fUrgent}</T>
                   </PressableScale>
                 );
               })}

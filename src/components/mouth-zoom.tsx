@@ -104,15 +104,15 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
             <View style={{ width: '100%', maxWidth: 560, alignSelf: 'center', gap: 18 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <View style={{ flex: 1, gap: 2 }}>
-                  <T style={{ fontSize: 12, letterSpacing: 1.6, textTransform: 'uppercase', color: c.accentText, fontFamily: 'PlusJakartaSans_700Bold' }}>{t.tapTooth}</T>
-                  <Display style={{ fontSize: 26 }}>{fill(t.mouthTitle, { name })}</Display>
+                  <Display style={{ fontSize: 26, lineHeight: 32 }}>{fill(t.mouthTitle, { name })}</Display>
+                  <T style={{ fontSize: 14, lineHeight: 20, color: c.textMuted }}>{t.tapTooth}</T>
                 </View>
                 <PressableScale
                   accessibilityRole="button"
                   accessibilityLabel={t.close}
                   onPress={close}
                   hitSlop={8}
-                  style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.10)', borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}>
+                  style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: c.track, borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}>
                   <X size={22} color={c.text} strokeWidth={2.2} />
                 </PressableScale>
               </View>

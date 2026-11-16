@@ -207,7 +207,7 @@ export function FluorideCard({ index = 0 }: { index?: number }) {
               <T style={{ fontFamily: fonts.semi, color: tone.fg }}>{s.daysLeft}</T>
             </View>
           ) : null}
-          <View style={{ height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.10)', overflow: 'hidden' }}>
+          <View style={{ height: 8, borderRadius: 4, backgroundColor: c.track, overflow: 'hidden' }}>
             <Animated.View style={[{ height: 8, width: '100%', borderRadius: 4, backgroundColor: tone.fg, transformOrigin: 'left' }, barStyle]} />
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -288,8 +288,8 @@ export function FluorideCard({ index = 0 }: { index?: number }) {
                       setJustSaved(false);
                     }}
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: on ? tint(c, 'rose').fg : c.surface, borderWidth: 1, borderColor: c.border }}>
-                    <T style={{ fontSize: 13, fontVariant: ['tabular-nums'], color: on ? '#0B0A1A' : c.text }}>{on ? s.tapAgain : fmt(k, lang)}</T>
-                    <X size={13} color={on ? '#0B0A1A' : c.textMuted} />
+                    <T style={{ fontSize: 13, fontVariant: ['tabular-nums'], color: on ? c.ink : c.text }}>{on ? s.tapAgain : fmt(k, lang)}</T>
+                    <X size={13} color={on ? c.ink : c.textMuted} />
                   </PressableScale>
                 );
               })}

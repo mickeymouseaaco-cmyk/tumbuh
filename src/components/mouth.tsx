@@ -104,7 +104,7 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
       grow.value = 0.35;
       grow.value = withSequence(
         withTiming(1.14, { duration: 260, easing: motion.ease, reduceMotion: ReduceMotion.System }),
-        withTiming(1, { duration: 220, easing: motion.ease, reduceMotion: ReduceMotion.System }),
+        withTiming(1, { duration: 260, easing: motion.pop, reduceMotion: ReduceMotion.System }),
       );
     }
     last.value = status;
@@ -140,7 +140,7 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
       {selected ? (
         <Animated.View
           entering={FadeIn.duration(160)}
-          style={{ position: 'absolute', width: size * 0.98, height: size * 0.98, borderRadius: size, borderWidth: 2, borderColor: c.accent, boxShadow: `0 0 ${14 * s}px ${c.glow}` }}
+          style={{ position: 'absolute', width: size * 0.98, height: size * 0.98, borderRadius: size, borderWidth: 2, borderColor: c.white }}
         />
       ) : null}
       <Animated.View style={[{ width: size, height: size }, crownStyle]}>
@@ -250,10 +250,10 @@ export function MouthExplorer({ maxWidth }: { maxWidth?: number }) {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 16 }}>
         {(['in', 'due', 'not'] as Status[]).map((st) => (
           <View key={st} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center', boxShadow: st === 'due' ? `0 0 10px ${c.glow}` : undefined }}>
+            <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center', borderWidth: st === 'due' ? 2 : 0, borderColor: c.accent }}>
               <Crown kind="c" status={st} s={0.5} />
             </View>
-            <T style={{ fontSize: 12, color: c.textMuted }}>{st === 'in' ? t.legIn : st === 'due' ? t.legDue : t.legNot}</T>
+            <T style={{ fontFamily: fonts.medium, fontSize: 13, color: c.textMuted }}>{st === 'in' ? t.legIn : st === 'due' ? t.legDue : t.legNot}</T>
           </View>
         ))}
       </View>
@@ -264,7 +264,7 @@ export function MouthExplorer({ maxWidth }: { maxWidth?: number }) {
             <Crown kind={sk} status={status} s={58 / boxFor(sk)} />
           </View>
           <View style={{ flex: 1, gap: 3 }}>
-            <T style={{ fontFamily: fonts.display, fontSize: 18 }}>{toothName(sj, sk, lang)}</T>
+            <T style={{ fontFamily: fonts.display, fontSize: 19, lineHeight: 24 }}>{toothName(sj, sk, lang)}</T>
             <T style={{ fontSize: 14, color: c.textMuted }}>
               {t.usually} {range(toothAges[sj][sk], t.unit)}
             </T>

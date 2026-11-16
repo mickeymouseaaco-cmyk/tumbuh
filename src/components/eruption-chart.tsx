@@ -83,7 +83,7 @@ export function EruptionChart() {
             rows.map((r, i) => {
               const now = age >= r.r[0] && age <= r.r[1];
               const both = erupted[toothId(r.jaw, r.kind, 'R')] && erupted[toothId(r.jaw, r.kind, 'L')];
-              const color = both ? c.onMint : now ? c.accent : age > r.r[1] ? 'rgba(127,240,220,0.45)' : 'rgba(255,255,255,0.20)';
+              const color = both ? c.onMint : now ? c.accent : age > r.r[1] ? 'rgba(127,240,220,0.45)' : c.borderStrong;
               return (
                 <Pressable
                   key={r.jaw + r.kind}
@@ -97,15 +97,15 @@ export function EruptionChart() {
                   {TICKS.map((m) => (
                     <View key={m} style={{ position: 'absolute', left: x(m), top: 0, bottom: 0, width: 1, backgroundColor: c.line }} />
                   ))}
-                  <Bar left={x(r.r[0])} width={x(r.r[1]) - x(r.r[0])} color={color} glow={now ? c.glow : undefined} delay={i * 50} />
+                  <Bar left={x(r.r[0])} width={x(r.r[1]) - x(r.r[0])} color={color} delay={i * 50} />
                 </Pressable>
               );
             })}
           {/* now line */}
           {tw > 0 ? (
             <Animated.View style={[{ position: 'absolute', top: 0, bottom: 0, left: 0, alignItems: 'center', width: 0, pointerEvents: 'none' }, nowStyle]}>
-              <View style={{ position: 'absolute', top: 0, paddingHorizontal: 8, height: 20, borderRadius: 10, backgroundColor: c.accent, justifyContent: 'center', boxShadow: `0 0 12px ${c.glow}` }}>
-                <T style={{ fontSize: 11, fontFamily: fonts.bold, color: c.onAccent, fontVariant: ['tabular-nums'] }}>
+              <View style={{ position: 'absolute', top: 0, paddingHorizontal: 8, height: 20, borderRadius: 10, backgroundColor: c.accent, justifyContent: 'center' }}>
+                <T style={{ fontSize: 12, lineHeight: 15, fontFamily: fonts.bold, color: c.onAccent, fontVariant: ['tabular-nums'] }}>
                   {age} {t.unit}
                 </T>
               </View>
@@ -121,13 +121,13 @@ export function EruptionChart() {
         <View style={{ flex: 1, height: 16 }}>
           {tw > 0 &&
             TICKS.map((m) => (
-              <T key={m} style={{ position: 'absolute', left: x(m) - 10, width: 20, textAlign: 'center', fontSize: 11, color: c.textMuted, fontVariant: ['tabular-nums'] }}>
+              <T key={m} style={{ position: 'absolute', left: x(m) - 10, width: 20, textAlign: 'center', fontSize: 12, color: c.textSubtle, fontVariant: ['tabular-nums'] }}>
                 {m}
               </T>
             ))}
         </View>
       </View>
-      <T style={{ fontSize: 11, color: c.textMuted, textAlign: 'right' }}>{t.months}</T>
+      <T style={{ fontSize: 12, color: c.textSubtle, textAlign: 'right' }}>{t.months}</T>
 
       {/* the row you tapped */}
       <Animated.View key={sel + lang} entering={FadeIn.duration(motion.base)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.tile, backgroundColor: c.surfaceAlt }}>

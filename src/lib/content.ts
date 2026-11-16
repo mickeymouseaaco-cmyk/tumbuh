@@ -89,6 +89,20 @@ export const strings = {
     close: 'Tutup',
     callTitle: 'Ragu-ragu?',
     callBody: 'Klinik pergigian kerajaan dan swasta boleh periksa anak anda. Lebih awal, lebih baik.',
+    peek: 'Intai ke dalam mulut',
+    quickChart: 'Carta gigi',
+    quickLearn: 'Belajar',
+    markedCount: '{n} daripada 20 ditanda',
+    cardsCount: '{n} daripada {m} kad',
+    forAge: 'Sesuai untuk umur ini',
+    openLesson: 'Buka pelajaran',
+    learnProgress: '{n} daripada {m} kad difahami',
+    learnHint: 'Tekan kad bila anda sudah faham.',
+    gotIt: 'Faham',
+    markGot: 'Tanda faham',
+    topicDone: 'Tahniah! Topik ini selesai.',
+    allIn: 'Semua 20 gigi susu sudah tumbuh!',
+    teethProgress: 'Gigi yang sudah tumbuh',
     jaw: { U: 'atas', L: 'bawah' },
     side: { R: 'kanan', L: 'kiri' },
   },
@@ -172,6 +186,20 @@ export const strings = {
     close: 'Close',
     callTitle: 'Not sure?',
     callBody: 'Any government or private dental clinic can check your child. Earlier is better.',
+    peek: 'Peek inside the mouth',
+    quickChart: 'Teeth chart',
+    quickLearn: 'Learn',
+    markedCount: '{n} of 20 marked',
+    cardsCount: '{n} of {m} cards',
+    forAge: 'Right for this age',
+    openLesson: 'Open lesson',
+    learnProgress: '{n} of {m} cards understood',
+    learnHint: 'Tap a card once you have got it.',
+    gotIt: 'Got it',
+    markGot: 'Mark as understood',
+    topicDone: 'Well done! This topic is complete.',
+    allIn: 'All 20 baby teeth are in!',
+    teethProgress: 'Teeth that are in',
     jaw: { U: 'Upper', L: 'Lower' },
     side: { R: 'right', L: 'left' },
   },
@@ -269,6 +297,15 @@ export const topicMeta = [
   { id: 'teething', icon: 'teething', tint: 'lilac', blurb: { bm: 'Tanda, cara legakan, elakkan', en: 'Signs, soothing, what to avoid' } },
   { id: 'dentist', icon: 'dentist', tint: 'butter', blurb: { bm: 'Bila pergi & apa berlaku', en: 'When to go and what happens' } },
 ] as const;
+
+/** The Learn topics that matter most at this age, most relevant first. */
+export function topicsForAge(age: number): string[] {
+  if (age < 4) return ['clean', 'food', 'teething', 'dentist', 'fluoride'];
+  if (age < 9) return ['teething', 'clean', 'fluoride', 'food', 'dentist'];
+  if (age < 12) return ['fluoride', 'clean', 'dentist', 'food', 'teething'];
+  if (age < 18) return ['dentist', 'food', 'fluoride', 'clean', 'teething'];
+  return ['food', 'clean', 'fluoride', 'dentist', 'teething'];
+}
 
 export const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
 

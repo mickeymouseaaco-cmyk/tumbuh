@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TeethHalo } from '@/components/mascot';
 import { TumbuhBaby } from '@/components/tumbuh-baby';
-import { Button, Display, PressableScale, T } from '@/components/ui';
+import { Aurora, Button, Display, PressableScale, T } from '@/components/ui';
 import { fill } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
@@ -41,6 +41,7 @@ export default function Welcome() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: c.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <Aurora />
       <View style={{ flex: 1, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 20, paddingHorizontal: 24 }}>
         <View style={{ width: '100%', maxWidth: 480, alignSelf: 'center', flex: 1 }}>
           {/* top row: back + progress */}
@@ -74,14 +75,14 @@ export default function Welcome() {
             {step === 0 ? (
               <Animated.View key="s0" entering={entering} exiting={FadeOut.duration(140)} style={{ gap: 24 }}>
                 <Animated.View entering={FadeIn.duration(600)} style={{ alignSelf: 'center' }}>
-                  <TeethHalo erupted={DEMO} age={age} size={200} />
+                  <TeethHalo erupted={DEMO} age={age} size={220} />
                 </Animated.View>
                 <View style={{ gap: 10 }}>
                   <Display style={{ fontSize: 34, lineHeight: 40, textAlign: 'center' }}>{t.welcomeTitle}</Display>
                   <T style={{ fontSize: 16, lineHeight: 24, color: c.textMuted, textAlign: 'center' }}>{t.welcomeSub}</T>
                 </View>
                 <View style={{ gap: 10 }}>
-                  <T style={{ fontFamily: fonts.semi, fontSize: 13, color: c.textMuted, textAlign: 'center' }}>{t.chooseLang}</T>
+                  <T style={{ fontFamily: fonts.semi, fontSize: 14, color: c.textMuted, textAlign: 'center' }}>{t.chooseLang}</T>
                   {langs.map((o) => {
                     const on = lang === o.lang;
                     return (
@@ -97,14 +98,14 @@ export default function Welcome() {
                           flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
                           minHeight: 66, paddingVertical: 14, paddingHorizontal: 18,
                           borderRadius: radius.tile, borderCurve: 'continuous', borderWidth: 2,
-                          borderColor: on ? c.accent : c.border, backgroundColor: on ? c.accentSoft : c.surface,
+                          borderColor: on ? c.brand : c.border, backgroundColor: on ? c.brandSoft : c.surface,
                         }}>
                         <View style={{ gap: 2 }}>
                           <T style={{ fontFamily: fonts.semi, fontSize: 16 }}>{o.name}</T>
                           <T style={{ fontSize: 13, color: c.textMuted }}>{o.sub}</T>
                         </View>
-                        <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: on ? c.accent : 'transparent', borderWidth: on ? 0 : 2, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}>
-                          {on ? <Check size={16} color={c.onAccent} strokeWidth={3} /> : null}
+                        <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: on ? c.brand : 'transparent', borderWidth: on ? 0 : 2, borderColor: c.borderStrong, alignItems: 'center', justifyContent: 'center' }}>
+                          {on ? <Check size={16} color={c.white} strokeWidth={3} /> : null}
                         </View>
                       </PressableScale>
                     );
@@ -131,16 +132,15 @@ export default function Welcome() {
                         }}
                         style={{
                           flex: 1, alignItems: 'center', gap: 10, paddingVertical: 16, borderRadius: radius.card, borderCurve: 'continuous', borderWidth: 2,
-                          borderColor: on ? c.accent : c.border, backgroundColor: on ? c.accentSoft : c.surface,
-                          boxShadow: on ? `0 0 22px ${c.glow}` : undefined,
+                          borderColor: on ? c.brand : c.border, backgroundColor: on ? c.brandSoft : c.surface,
                         }}>
                         {/* the chosen child waves hello */}
                         <View style={{ height: 124, justifyContent: 'flex-end' }}>
                           <Animated.View key={on ? 'on' : 'off'} entering={FadeIn.duration(motion.base)}>
-                            <TumbuhBaby gender={g} pose={on ? 'wave' : 'master'} height={120} />
+                            <TumbuhBaby gender={g} pose={on ? 'wave' : 'master'} height={120} alive={on} />
                           </Animated.View>
                         </View>
-                        <T style={{ fontFamily: fonts.semi, fontSize: 16, color: on ? c.accentText : c.text }}>{g === 'boy' ? t.boy : t.girl}</T>
+                        <T style={{ fontFamily: fonts.semi, fontSize: 16, color: on ? c.onBrandSoft : c.text }}>{g === 'boy' ? t.boy : t.girl}</T>
                       </PressableScale>
                     );
                   })}
@@ -205,14 +205,7 @@ export default function Welcome() {
 
           <View style={{ gap: 10 }}>
             {step < 2 ? (
-              <Button
-                label={t.next}
-                onPress={() => {
-                  if (step === 1 && !gender) return; // pick boy or girl first
-                  go(step + 1);
-                }}
-                style={step === 1 && !gender ? { opacity: 0.4 } : undefined}
-              />
+              <Button label={t.next} disabled={step === 1 && !gender} onPress={() => go(step + 1)} />
             ) : (
               <Button label={t.start} onPress={finish} />
             )}

@@ -54,6 +54,60 @@
         flex: 1;
       }
     </style>
+    <style id="tumbuh-tokens">
+      /* Tumbuh design tokens for the parts the browser draws itself (the app's own tokens live in src/theme.ts). */
+      :root {
+        --tb-bg: #0b0a1a;
+        --tb-surface: #17152e;
+        --tb-text: #f4f1ff;
+        --tb-muted: #ada7cc;
+        --tb-brand: #7c6cff;
+        --tb-accent: #ff7ab0;
+        --tb-accent-text: #ff9cc4;
+        color-scheme: dark;
+      }
+      body {
+        color: var(--tb-text);
+        caret-color: var(--tb-accent);
+        accent-color: var(--tb-accent);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      ::selection {
+        background: rgba(124, 108, 255, 0.45);
+        color: #fff;
+      }
+      /* keyboard focus: a clear ring, only when navigating by keyboard */
+      :focus {
+        outline: none;
+      }
+      :focus-visible {
+        outline: 2px solid var(--tb-accent-text);
+        outline-offset: 3px;
+        border-radius: 12px;
+      }
+      input:focus-visible,
+      textarea:focus-visible {
+        outline-offset: 0;
+        border-radius: 18px;
+      }
+      /* thin, quiet scrollbars on desktop */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    </style>
     <style id="tumbuh-fit">
       html,
       body,

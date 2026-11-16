@@ -19,7 +19,7 @@ import { useAdmin } from '@/lib/admin';
 import { haptic } from '@/lib/haptics';
 import { problemPhotos } from '@/lib/photos';
 import { useStore } from '@/lib/store';
-import { fonts, motion, radius, tint, useTheme, type Tint } from '@/theme';
+import { elevation, fonts, motion, radius, tint, useTheme, type Tint } from '@/theme';
 
 export const TAG_TINT: Record<Tag, Tint> = { ok: 'mint', check: 'butter', urgent: 'rose' };
 export const TAG_ICON = { ok: CircleCheck, check: Stethoscope, urgent: Siren };
@@ -141,7 +141,7 @@ export function SmartStack({
   return (
     <View style={{ flex: 1, gap: 8 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginLeft: 4 }}>
-        <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 15, color: c.textMuted }} numberOfLines={1}>{title}</T>
+        <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 16, color: c.text }} numberOfLines={1}>{title}</T>
         {onAdd ? (
           <Pressable
             accessibilityRole="button"
@@ -151,7 +151,7 @@ export function SmartStack({
               onAdd();
             }}
             hitSlop={8}
-            style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 12px ${c.glow}` }}>
+            style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center' }}>
             <Plus size={18} color={c.onAccent} strokeWidth={2.8} />
           </Pressable>
         ) : null}
@@ -174,7 +174,7 @@ export function SmartStack({
                 haptic.soft();
                 onOpen(p, items);
               }}
-              style={{ flex: 1, borderRadius: radius.card, borderCurve: 'continuous', overflow: 'hidden', backgroundColor: c.surfaceSolid, borderWidth: 1, borderColor: c.border, boxShadow: `0 14px 30px ${c.shadow}` }}>
+              style={{ flex: 1, borderRadius: radius.card, borderCurve: 'continuous', overflow: 'hidden', backgroundColor: c.surfaceSolid, borderWidth: 1, borderColor: c.border, boxShadow: elevation.card }}>
               <ProblemPhoto p={p} height="100%" />
               {/* legibility fade at the bottom */}
               <Svg width="100%" height={110} style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }} preserveAspectRatio="none" viewBox="0 0 10 10">
@@ -188,10 +188,10 @@ export function SmartStack({
               </Svg>
               <View style={{ position: 'absolute', left: 12, right: 22, bottom: 12, gap: 6 }}>
                 <View style={{ flexDirection: 'row', alignSelf: 'flex-start', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill, backgroundColor: tt.fg }}>
-                  <Icon size={11} color="#0B0A1A" strokeWidth={2.6} />
-                  <T style={{ fontSize: 10, fontFamily: fonts.bold, color: '#0B0A1A' }}>{tagLabel}</T>
+                  <Icon size={12} color={c.ink} strokeWidth={2.6} />
+                  <T style={{ fontSize: 12, lineHeight: 15, fontFamily: fonts.bold, color: c.ink }}>{tagLabel}</T>
                 </View>
-                <T style={{ fontFamily: fonts.display, fontSize: 15, lineHeight: 19, color: '#FFFFFF' }} numberOfLines={2}>
+                <T style={{ fontFamily: fonts.display, fontSize: 16, lineHeight: 20, color: c.white }} numberOfLines={2}>
                   {p.title[lang]}
                 </T>
               </View>
@@ -199,7 +199,7 @@ export function SmartStack({
               {n > 1 ? (
                 <View style={{ position: 'absolute', right: 8, top: 0, bottom: 0, justifyContent: 'center', gap: 4 }}>
                   {items.map((it, k) => (
-                    <View key={it.id} style={{ width: 4, height: k === i ? 12 : 4, borderRadius: 2, backgroundColor: k === i ? '#FFFFFF' : 'rgba(255,255,255,0.45)' }} />
+                    <View key={it.id} style={{ width: 4, height: k === i ? 12 : 4, borderRadius: 2, backgroundColor: k === i ? c.white : 'rgba(255,255,255,0.45)' }} />
                   ))}
                 </View>
               ) : null}

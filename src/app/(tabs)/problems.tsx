@@ -78,8 +78,8 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
                       haptic.soft();
                     }}
                     style={{ ...pill, backgroundColor: armed === 'photo' ? rose.fg : c.surface }}>
-                    <Trash2 size={16} color={armed === 'photo' ? '#0B0A1A' : c.onRose} />
-                    <T style={{ fontSize: 13, color: armed === 'photo' ? '#0B0A1A' : c.onRose }}>
+                    <Trash2 size={16} color={armed === 'photo' ? c.ink : c.onRose} />
+                    <T style={{ fontSize: 13, color: armed === 'photo' ? c.ink : c.onRose }}>
                       {armed === 'photo' ? (bm ? 'Tekan lagi untuk buang' : 'Tap again to remove') : bm ? 'Buang foto' : 'Remove photo'}
                     </T>
                   </PressableScale>
@@ -100,8 +100,8 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
                     close();
                   }}
                   style={{ ...pill, backgroundColor: armed === 'item' ? rose.fg : c.surface }}>
-                  <Trash2 size={16} color={armed === 'item' ? '#0B0A1A' : c.onRose} />
-                  <T style={{ fontSize: 13, color: armed === 'item' ? '#0B0A1A' : c.onRose }}>
+                  <Trash2 size={16} color={armed === 'item' ? c.ink : c.onRose} />
+                  <T style={{ fontSize: 13, color: armed === 'item' ? c.ink : c.onRose }}>
                     {armed === 'item' ? (bm ? 'Tekan lagi untuk buang' : 'Tap again to remove') : bm ? 'Buang keadaan ini' : 'Remove this condition'}
                   </T>
                 </PressableScale>
@@ -124,8 +124,8 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
                           admin.setTag(cur.id, g);
                         }}
                         style={{ ...pill, backgroundColor: on ? gt.fg : c.surface, borderColor: on ? gt.fg : c.border }}>
-                        <GIcon size={15} color={on ? '#0B0A1A' : gt.fg} strokeWidth={2.4} />
-                        <T style={{ fontSize: 13, fontFamily: fonts.semi, color: on ? '#0B0A1A' : c.text }}>{g === 'ok' ? t.fOk : g === 'check' ? t.fCheck : t.fUrgent}</T>
+                        <GIcon size={15} color={on ? c.ink : gt.fg} strokeWidth={2.4} />
+                        <T style={{ fontSize: 13, fontFamily: fonts.semi, color: on ? c.ink : c.text }}>{g === 'ok' ? t.fOk : g === 'check' ? t.fCheck : t.fUrgent}</T>
                       </PressableScale>
                     );
                   })}
@@ -156,17 +156,17 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
 
         {/* close + flip through this stack */}
         <View style={{ position: 'absolute', top: insets.top + 12, right: 16 }}>
-          <PressableScale accessibilityRole="button" accessibilityLabel={t.close} onPress={close} hitSlop={8} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(11,10,26,0.7)', borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}>
-            <X size={22} color="#FFFFFF" strokeWidth={2.2} />
+          <PressableScale accessibilityRole="button" accessibilityLabel={t.close} onPress={close} hitSlop={8} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: c.scrim, borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}>
+            <X size={22} color={c.white} strokeWidth={2.2} />
           </PressableScale>
         </View>
         {list.length > 1 ? (
           <View style={{ position: 'absolute', top: 254, left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between' }}>
-            <PressableScale accessibilityRole="button" accessibilityLabel={lang === 'bm' ? 'Sebelum' : 'Previous'} onPress={() => step(-1)} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(11,10,26,0.7)', alignItems: 'center', justifyContent: 'center' }}>
-              <ChevronLeft size={22} color="#FFFFFF" />
+            <PressableScale accessibilityRole="button" accessibilityLabel={lang === 'bm' ? 'Sebelum' : 'Previous'} onPress={() => step(-1)} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.scrim, alignItems: 'center', justifyContent: 'center' }}>
+              <ChevronLeft size={22} color={c.white} />
             </PressableScale>
-            <PressableScale accessibilityRole="button" accessibilityLabel={lang === 'bm' ? 'Seterusnya' : 'Next'} onPress={() => step(1)} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(11,10,26,0.7)', alignItems: 'center', justifyContent: 'center' }}>
-              <ChevronRight size={22} color="#FFFFFF" />
+            <PressableScale accessibilityRole="button" accessibilityLabel={lang === 'bm' ? 'Seterusnya' : 'Next'} onPress={() => step(1)} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.scrim, alignItems: 'center', justifyContent: 'center' }}>
+              <ChevronRight size={22} color={c.white} />
             </PressableScale>
           </View>
         ) : null}
@@ -189,7 +189,7 @@ export default function Problems() {
     <Screen title={t.probTitle} subtitle={t.probSub}>
       {admin.enabled ? (
         // TEMPORARY editing tools (lib/admin.ts): send everything to Claude as one file
-        <View style={{ padding: 16, gap: 10, borderRadius: radius.card, backgroundColor: c.accentSoft, borderWidth: 1, borderColor: 'rgba(255,122,176,0.45)' }}>
+        <View style={{ padding: 16, gap: 10, borderRadius: radius.card, backgroundColor: c.accentSoft, borderWidth: 1, borderColor: c.accentBorder }}>
           <T style={{ fontFamily: fonts.display, fontSize: 16, color: c.accentText }}>
             {lang === 'bm' ? 'Mod tambah (sementara)' : 'Editing mode (temporary)'} · {admin.count}
           </T>

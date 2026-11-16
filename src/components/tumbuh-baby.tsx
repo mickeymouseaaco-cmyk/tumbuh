@@ -1,13 +1,15 @@
 /**
  * The official Tumbuh mascot (Kenji the boy, Yuki the girl), drawn from the approved character sheet
- * (design/tumbuh-baby-sheet.jpg → public/characters/tumbuh-baby/<gender>/<pose>.png, transparent PNGs).
+ * (design/tumbuh-baby-sheet.jpg → public/characters/tumbuh-baby/<gender>/<pose>.webp, transparent WebP).
  *
  * Always show the artwork as it is: never redraw, recolour or stretch it. Pick a pose and a height;
  * the width follows the art's own proportions.
  */
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Image, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+
+import { motion } from '@/theme';
 
 export type BabyGender = 'boy' | 'girl';
 export type BabyPose = 'master' | 'front' | 'side' | 'back' | 'smile' | 'brush' | 'surprised' | 'wave';
@@ -16,24 +18,24 @@ type Art = { src: number; w: number; h: number; /** mouth centre and width, as f
 
 const ART: Record<BabyGender, Record<BabyPose, Art>> = {
   boy: {
-    master: { src: require('../../public/characters/tumbuh-baby/boy/master.png'), w: 109, h: 302, mouth: { x: 0.624, y: 0.308, w: 0.22 } },
-    front: { src: require('../../public/characters/tumbuh-baby/boy/front.png'), w: 123, h: 301 },
-    side: { src: require('../../public/characters/tumbuh-baby/boy/side.png'), w: 107, h: 300 },
-    back: { src: require('../../public/characters/tumbuh-baby/boy/back.png'), w: 120, h: 297 },
-    smile: { src: require('../../public/characters/tumbuh-baby/boy/smile.png'), w: 175, h: 293, mouth: { x: 0.394, y: 0.287, w: 0.18 } },
-    brush: { src: require('../../public/characters/tumbuh-baby/boy/brush.png'), w: 129, h: 292, mouth: { x: 0.512, y: 0.298, w: 0.23 } },
-    surprised: { src: require('../../public/characters/tumbuh-baby/boy/surprised.png'), w: 104, h: 292, mouth: { x: 0.5, y: 0.312, w: 0.1 } },
-    wave: { src: require('../../public/characters/tumbuh-baby/boy/wave.png'), w: 154, h: 293, mouth: { x: 0.474, y: 0.287, w: 0.195 } },
+    master: { src: require('../../public/characters/tumbuh-baby/boy/master.webp'), w: 109, h: 302, mouth: { x: 0.624, y: 0.308, w: 0.22 } },
+    front: { src: require('../../public/characters/tumbuh-baby/boy/front.webp'), w: 123, h: 301 },
+    side: { src: require('../../public/characters/tumbuh-baby/boy/side.webp'), w: 107, h: 300 },
+    back: { src: require('../../public/characters/tumbuh-baby/boy/back.webp'), w: 120, h: 297 },
+    smile: { src: require('../../public/characters/tumbuh-baby/boy/smile.webp'), w: 175, h: 293, mouth: { x: 0.394, y: 0.287, w: 0.18 } },
+    brush: { src: require('../../public/characters/tumbuh-baby/boy/brush.webp'), w: 129, h: 292, mouth: { x: 0.512, y: 0.298, w: 0.23 } },
+    surprised: { src: require('../../public/characters/tumbuh-baby/boy/surprised.webp'), w: 104, h: 292, mouth: { x: 0.5, y: 0.312, w: 0.1 } },
+    wave: { src: require('../../public/characters/tumbuh-baby/boy/wave.webp'), w: 154, h: 293, mouth: { x: 0.474, y: 0.287, w: 0.195 } },
   },
   girl: {
-    master: { src: require('../../public/characters/tumbuh-baby/girl/master.png'), w: 120, h: 296, mouth: { x: 0.633, y: 0.284, w: 0.183 } },
-    front: { src: require('../../public/characters/tumbuh-baby/girl/front.png'), w: 141, h: 295 },
-    side: { src: require('../../public/characters/tumbuh-baby/girl/side.png'), w: 107, h: 294 },
-    back: { src: require('../../public/characters/tumbuh-baby/girl/back.png'), w: 127, h: 296 },
-    smile: { src: require('../../public/characters/tumbuh-baby/girl/smile.png'), w: 139, h: 284, mouth: { x: 0.604, y: 0.289, w: 0.2 } },
-    brush: { src: require('../../public/characters/tumbuh-baby/girl/brush.png'), w: 152, h: 284, mouth: { x: 0.493, y: 0.292, w: 0.2 } },
-    surprised: { src: require('../../public/characters/tumbuh-baby/girl/surprised.png'), w: 154, h: 285, mouth: { x: 0.513, y: 0.288, w: 0.08 } },
-    wave: { src: require('../../public/characters/tumbuh-baby/girl/wave.png'), w: 171, h: 284, mouth: { x: 0.439, y: 0.289, w: 0.152 } },
+    master: { src: require('../../public/characters/tumbuh-baby/girl/master.webp'), w: 120, h: 296, mouth: { x: 0.633, y: 0.284, w: 0.183 } },
+    front: { src: require('../../public/characters/tumbuh-baby/girl/front.webp'), w: 141, h: 295 },
+    side: { src: require('../../public/characters/tumbuh-baby/girl/side.webp'), w: 107, h: 294 },
+    back: { src: require('../../public/characters/tumbuh-baby/girl/back.webp'), w: 127, h: 296 },
+    smile: { src: require('../../public/characters/tumbuh-baby/girl/smile.webp'), w: 139, h: 284, mouth: { x: 0.604, y: 0.289, w: 0.2 } },
+    brush: { src: require('../../public/characters/tumbuh-baby/girl/brush.webp'), w: 152, h: 284, mouth: { x: 0.493, y: 0.292, w: 0.2 } },
+    surprised: { src: require('../../public/characters/tumbuh-baby/girl/surprised.webp'), w: 154, h: 285, mouth: { x: 0.513, y: 0.288, w: 0.08 } },
+    wave: { src: require('../../public/characters/tumbuh-baby/girl/wave.webp'), w: 171, h: 284, mouth: { x: 0.439, y: 0.289, w: 0.152 } },
   },
 };
 
@@ -46,21 +48,28 @@ export function babyArt(gender: BabyGender, pose: BabyPose, height: number) {
 }
 
 /**
- * The mascot in one pose. `float` gives a gentle idle bob (off with Reduce Motion).
- * An unset gender ('') shows the boy; screens that haven't asked yet can show both side by side.
+ * The mascot in one pose.
+ * `alive`: it breathes (a 1.2% rise from the feet, 3.6 s) and floats a few pixels — never still, never busy.
+ * `reactKey`: when this value changes, the mascot does one happy hop (e.g. a tooth was just marked).
+ * All of it is off with Reduce Motion. An unset gender ('') shows the boy.
  */
 export function TumbuhBaby({
   pose = 'master',
   gender = 'boy',
   height,
+  alive = false,
   float = false,
+  reactKey,
   style,
   accessibilityLabel,
 }: {
   pose?: BabyPose;
   gender?: BabyGender | '';
   height: number;
+  alive?: boolean;
+  /** older name for `alive` */
   float?: boolean;
+  reactKey?: string | number;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
 }) {
@@ -68,26 +77,54 @@ export function TumbuhBaby({
   const a = ART[g][pose];
   const { width } = babyArt(g, pose, height);
   const reduce = useReducedMotion();
+  const live = alive || float;
   const bob = useSharedValue(0);
+  const breath = useSharedValue(0);
+  const hop = useSharedValue(0);
   useEffect(() => {
-    if (!float || reduce) return;
-    bob.value = withRepeat(withSequence(withTiming(-4, { duration: 1800 }), withTiming(0, { duration: 1800 })), -1);
-  }, [float, reduce, bob]);
-  const bobStyle = useAnimatedStyle(() => ({ transform: [{ translateY: bob.value }] }));
+    if (!live || reduce) return;
+    bob.value = withRepeat(withSequence(withTiming(-4, { duration: 2400, easing: motion.breathe }), withTiming(0, { duration: 2400, easing: motion.breathe })), -1);
+    breath.value = withRepeat(withSequence(withTiming(1, { duration: 1800, easing: motion.breathe }), withTiming(0, { duration: 1800, easing: motion.breathe })), -1);
+  }, [live, reduce, bob, breath]);
+
+  // one hop when something good happens; skipped on first render
+  const seen = useRef(reactKey);
+  useEffect(() => {
+    if (seen.current === reactKey) return;
+    seen.current = reactKey;
+    if (reduce) return;
+    hop.value = withSequence(
+      withTiming(1, { duration: 170, easing: motion.ease }),
+      withTiming(0, { duration: 360, easing: motion.pop }),
+    );
+  }, [reactKey, reduce, hop]);
+
+  const bodyStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: bob.value - hop.value * 14 },
+      // squash on take-off, breathe at rest; both grow from the feet
+      { scaleY: 1 + breath.value * 0.012 + hop.value * 0.03 },
+      { scaleX: 1 - hop.value * 0.02 },
+    ],
+  }));
 
   return (
-    <Animated.View style={[{ width, height }, bobStyle, style]} accessible={!!accessibilityLabel} accessibilityLabel={accessibilityLabel} accessibilityRole={accessibilityLabel ? 'image' : undefined}>
+    <Animated.View
+      style={[{ width, height, transformOrigin: 'bottom center' }, bodyStyle, style]}
+      accessible={!!accessibilityLabel}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={accessibilityLabel ? 'image' : undefined}>
       <Image source={a.src} style={{ width, height }} resizeMode="contain" accessibilityIgnoresInvertColors />
     </Animated.View>
   );
 }
 
 /** Boy and girl together (before the parent has chosen). */
-export function TumbuhPair({ height, pose = 'master', float = false }: { height: number; pose?: BabyPose; float?: boolean }) {
+export function TumbuhPair({ height, pose = 'master', alive = false }: { height: number; pose?: BabyPose; alive?: boolean }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}>
-      <TumbuhBaby gender="boy" pose={pose} height={height} float={float} />
-      <TumbuhBaby gender="girl" pose={pose} height={height} float={float} />
+      <TumbuhBaby gender="boy" pose={pose} height={height} alive={alive} />
+      <TumbuhBaby gender="girl" pose={pose} height={height} alive={alive} />
     </View>
   );
 }

@@ -13,10 +13,11 @@ type Saved = {
   erupted: Record<string, boolean>; // tooth id → in
   checks: Record<string, Record<string, boolean>>; // 'YYYY-MM-DD' → item key → done
   fluoride: string[]; // 'YYYY-MM-DD' of each fluoride varnish at the clinic, oldest first
+  learned: Record<string, boolean>; // Learn cards the parent ticked as understood: 'topic:card' → true
 };
 
 const KEY = 'tumbuh:v1';
-const initial: Saved = { onboarded: false, lang: 'bm', babyName: '', gender: '', age: 6, erupted: {}, checks: {}, fluoride: [] };
+const initial: Saved = { onboarded: false, lang: 'bm', babyName: '', gender: '', age: 6, erupted: {}, checks: {}, fluoride: [], learned: {} };
 
 export const today = () => {
   const d = new Date();
@@ -41,6 +42,7 @@ type Ctx = Saved & {
   todayChecks: Record<string, boolean>;
   logFluoride: (date: string) => void;
   removeFluoride: (date: string) => void;
+  toggleLearned: (key: string) => void;
 };
 
 const StoreContext = createContext<Ctx | null>(null);
@@ -91,6 +93,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }),
       logFluoride: (date) => update((d) => ({ ...d, fluoride: [...new Set([...d.fluoride, date])].sort() })),
       removeFluoride: (date) => update((d) => ({ ...d, fluoride: d.fluoride.filter((x) => x !== date) })),
+      toggleLearned: (key) =>
+        update((d) => {
+          const learned = { ...d.learned };
+          if (learned[key]) delete learned[key];
+          else learned[key] = true;
+          return { ...d, learned };
+        }),
       toggleCheck: (key) =>
         update((d) => {
           const cur = d.checks[day] ?? {};

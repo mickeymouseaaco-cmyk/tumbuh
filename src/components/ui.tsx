@@ -14,7 +14,11 @@ import {
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,7 +27,7 @@ import Svg, { Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { LogoMark } from '@/components/logo';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
-import { fonts, motion, radius, useTheme } from '@/theme';
+import { elevation, fonts, motion, radius, typo, useTheme } from '@/theme';
 
 export const TOOTH_PATH =
   'M8.5 3C6.5 3 5 4.6 5 7c0 2 .8 3.4 1.3 5 .6 2 .7 5 1.7 7.6.4 1 1.6 1 1.9-.1L11.1 14c.3-1 1.5-1 1.8 0l1.2 5.5c.3 1.1 1.5 1.1 1.9.1 1-2.6 1.1-5.6 1.7-7.6.5-1.6 1.3-3 1.3-5 0-2.4-1.5-4-3.5-4-1.6 0-2.2 1-4 1S10.1 3 8.5 3z';
@@ -52,20 +56,21 @@ export function T({ style, children, ...rest }: TextProps & { style?: StyleProp<
 export function Display({ style, children, ...rest }: TextProps & { style?: StyleProp<TextStyle>; children?: ReactNode }) {
   const { c } = useTheme();
   return (
-    <Text accessibilityRole="header" style={[{ fontFamily: fonts.display, color: c.text, fontSize: 30, letterSpacing: -0.3 }, style]} {...rest}>
+    <Text accessibilityRole="header" style={[typo.display, { color: c.text }, style]} {...rest}>
       {children}
     </Text>
   );
 }
 
 export function H2({ children, style }: { children: ReactNode; style?: StyleProp<TextStyle> }) {
-  return <T style={[{ fontFamily: fonts.display, fontSize: 19 }, style]}>{children}</T>;
+  return <T accessibilityRole="header" style={[typo.heading, style]}>{children}</T>;
 }
 
+/** A small field label (what the thing below is). Sentence case; never a shouty kicker over a title. */
 export function Eyebrow({ children, color }: { children: ReactNode; color?: string }) {
   const { c } = useTheme();
   return (
-    <T style={{ fontFamily: fonts.bold, fontSize: 12, letterSpacing: 0.8, textTransform: 'uppercase', color: color ?? c.accentText }}>
+    <T style={{ fontFamily: fonts.semi, fontSize: 13, lineHeight: 17, letterSpacing: 0.2, color: color ?? c.accentText }}>
       {children}
     </T>
   );
@@ -75,12 +80,18 @@ export function Eyebrow({ children, color }: { children: ReactNode; color?: stri
 
 const APressable = Animated.createAnimatedComponent(Pressable);
 
-/** Scales to 0.97 on press-in (110 ms, strong ease-out). Used on every button and card. */
+/**
+ * Press feedback for every button and card: scales to 0.97 on press-in (110 ms), settles back in 200 ms.
+ * With a mouse it lifts very slightly on hover. Disabled controls don't move.
+ */
 export function PressableScale({
   style,
   scaleTo = 0.97,
   onPressIn,
   onPressOut,
+  onHoverIn,
+  onHoverOut,
+  disabled,
   children,
   ...rest
 }: Omit<PressableProps, 'style' | 'children'> & { style?: StyleProp<ViewStyle>; scaleTo?: number; children?: ReactNode }) {
@@ -89,6 +100,7 @@ export function PressableScale({
   return (
     <APressable
       {...rest}
+      disabled={disabled}
       onPressIn={(e) => {
         s.value = withTiming(scaleTo, { duration: motion.press, easing: motion.ease });
         onPressIn?.(e);
@@ -96,6 +108,14 @@ export function PressableScale({
       onPressOut={(e) => {
         s.value = withTiming(1, { duration: motion.release, easing: motion.ease });
         onPressOut?.(e);
+      }}
+      onHoverIn={(e) => {
+        if (!disabled) s.value = withTiming(1.015, { duration: motion.press, easing: motion.ease });
+        onHoverIn?.(e);
+      }}
+      onHoverOut={(e) => {
+        s.value = withTiming(1, { duration: motion.release, easing: motion.ease });
+        onHoverOut?.(e);
       }}
       style={[style, a]}>
       {children}
@@ -107,28 +127,53 @@ export function Button({
   label,
   onPress,
   kind = 'primary',
+  disabled = false,
+  icon,
   style,
 }: {
   label: string;
   onPress: () => void;
   kind?: 'primary' | 'soft' | 'ghost';
+  disabled?: boolean;
+  icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
   const { c } = useTheme();
-  const bg = kind === 'primary' ? c.accent : kind === 'soft' ? c.accentSoft : 'transparent';
-  const fg = kind === 'primary' ? c.onAccent : c.accentText;
+  const bg = disabled ? c.disabledBg : kind === 'primary' ? c.accent : kind === 'soft' ? c.accentSoft : 'transparent';
+  const fg = disabled ? c.disabledText : kind === 'primary' ? c.onAccent : c.accentText;
   return (
     <PressableScale
       accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={[
-        { minHeight: 54, paddingHorizontal: 24, borderRadius: radius.pill, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' },
-        kind === 'primary' && { boxShadow: `0 0 28px ${c.glow}, 0 0 0 1px rgba(255,255,255,0.25) inset` },
-        kind !== 'primary' && { borderWidth: 1, borderColor: c.border },
+        { minHeight: 54, paddingHorizontal: 24, borderRadius: radius.pill, backgroundColor: bg, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center' },
+        kind === 'primary' && !disabled && { boxShadow: elevation.action },
+        (kind !== 'primary' || disabled) && { borderWidth: 1, borderColor: kind === 'soft' && !disabled ? c.accentBorder : c.border },
         style,
       ]}>
-      <T style={{ fontFamily: fonts.semi, fontSize: 16, color: fg }}>{label}</T>
+      {icon}
+      <T style={[typo.button, { color: fg }]}>{label}</T>
     </PressableScale>
+  );
+}
+
+/** A progress line that fills smoothly when the value changes (0–1). */
+export function ProgressBar({ value, color, height = 8, delay = 0 }: { value: number; color?: string; height?: number; delay?: number }) {
+  const { c } = useTheme();
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(delay, withTiming(Math.max(0, Math.min(1, value)), { duration: motion.progress, easing: motion.ease }));
+  }, [value, delay, v]);
+  const a = useAnimatedStyle(() => ({ transform: [{ scaleX: v.value }] }));
+  return (
+    <View
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(value * 100) }}
+      style={{ height, borderRadius: height / 2, backgroundColor: c.track, overflow: 'hidden' }}>
+      <Animated.View style={[{ height, width: '100%', borderRadius: height / 2, backgroundColor: color ?? c.accent, transformOrigin: 'left center' }, a]} />
+    </View>
   );
 }
 
@@ -150,7 +195,7 @@ export function Card({ children, style, index }: { children: ReactNode; style?: 
           padding: 20,
           borderWidth: 1,
           borderColor: c.border,
-          boxShadow: `0 16px 40px ${c.shadow}`,
+          boxShadow: elevation.card,
         },
         style,
       ]}>
@@ -171,7 +216,7 @@ export function LangSwitch() {
     <View accessibilityRole="radiogroup" accessibilityLabel="Language" style={{ flexDirection: 'row', padding: 4, borderRadius: radius.pill, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
       <Animated.View
         style={[
-          { position: 'absolute', top: 4, left: 4, width: 48, height: 36, borderRadius: radius.pill, backgroundColor: c.accentSoft, borderWidth: 1, borderColor: c.accent, boxShadow: `0 0 14px ${c.glow}` },
+          { position: 'absolute', top: 4, left: 4, width: 48, height: 36, borderRadius: radius.pill, backgroundColor: c.brandSoft, borderWidth: 1, borderColor: c.brand },
           knob,
         ]}
       />
@@ -187,7 +232,7 @@ export function LangSwitch() {
               setLang(l);
             }}
             style={{ width: 48, height: 36, alignItems: 'center', justifyContent: 'center' }}>
-            <T style={{ fontFamily: fonts.bold, fontSize: 13, color: on ? c.accentText : c.textMuted }}>{l.toUpperCase()}</T>
+            <T style={{ fontFamily: fonts.bold, fontSize: 13, color: on ? c.onBrandSoft : c.textMuted }}>{l.toUpperCase()}</T>
           </Pressable>
         );
       })}
@@ -205,21 +250,20 @@ export function Screen({ title, subtitle, eyebrow, children }: { title: string; 
     <ScrollView
       style={{ flex: 1 }}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 32, paddingHorizontal: 20 }}>
-      <View style={{ width: '100%', maxWidth: 560, alignSelf: 'center', gap: 16 }}>
+      contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 40, paddingHorizontal: 20 }}>
+      <View style={{ width: '100%', maxWidth: 560, alignSelf: 'center', gap: 18 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ borderRadius: 11, boxShadow: `0 0 18px ${c.glow}` }}>
-              <LogoMark size={36} />
-            </View>
-            <T style={{ fontFamily: fonts.displayBold, fontSize: 20, letterSpacing: 0.5, color: c.text }}>tumbuh<T style={{ fontFamily: fonts.displayBold, fontSize: 20, color: c.accent }}>.</T></T>
+            <LogoMark size={36} />
+            <T style={{ fontFamily: fonts.displayBold, fontSize: 21, letterSpacing: 0.2, color: c.text }}>tumbuh<T style={{ fontFamily: fonts.displayBold, fontSize: 21, color: c.accent }}>.</T></T>
           </View>
           <LangSwitch />
         </View>
-        <Animated.View entering={enter(0)} style={{ gap: 4, marginTop: 8 }}>
-          {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+        <Animated.View entering={enter(0)} style={{ gap: 6, marginTop: 12, marginBottom: 4 }}>
           <Display>{title}</Display>
-          {subtitle ? <T style={{ fontSize: 15, lineHeight: 22, color: c.textMuted }}>{subtitle}</T> : null}
+          {subtitle || eyebrow ? (
+            <T style={[typo.body, { color: c.textMuted }]}>{eyebrow ? `${eyebrow}. ` : ''}{subtitle}</T>
+          ) : null}
         </Animated.View>
         {children}
       </View>
@@ -228,30 +272,42 @@ export function Screen({ title, subtitle, eyebrow, children }: { title: string; 
   );
 }
 
-/** Soft aurora glows behind every screen. Static (no motion), drawn once. */
+/**
+ * Soft aurora glows behind every screen. It drifts very slowly (ambient layer, 26 s there and back)
+ * so the page feels alive without anything moving near the text. Still with Reduce Motion.
+ */
 export function Aurora() {
   const { c } = useTheme();
+  const reduce = useReducedMotion();
+  const d = useSharedValue(0);
+  useEffect(() => {
+    if (reduce) return;
+    d.value = withRepeat(withSequence(withTiming(1, { duration: 13000, easing: motion.breathe }), withTiming(0, { duration: 13000, easing: motion.breathe })), -1);
+  }, [reduce, d]);
+  const drift = useAnimatedStyle(() => ({ transform: [{ translateX: d.value * 14 }, { translateY: d.value * -18 }, { scale: 1 + d.value * 0.04 }] }));
   return (
-    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
-      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
-        <Defs>
-          <RadialGradient id="aA" cx="10" cy="4" r="60" gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor={c.auroraA} stopOpacity="0.42" />
-            <Stop offset="1" stopColor={c.auroraA} stopOpacity="0" />
-          </RadialGradient>
-          <RadialGradient id="aB" cx="100" cy="30" r="55" gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor={c.auroraB} stopOpacity="0.18" />
-            <Stop offset="1" stopColor={c.auroraB} stopOpacity="0" />
-          </RadialGradient>
-          <RadialGradient id="aC" cx="30" cy="100" r="60" gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor={c.auroraC} stopOpacity="0.20" />
-            <Stop offset="1" stopColor={c.auroraC} stopOpacity="0" />
-          </RadialGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100" height="100" fill="url(#aA)" />
-        <Rect x="0" y="0" width="100" height="100" fill="url(#aB)" />
-        <Rect x="0" y="0" width="100" height="100" fill="url(#aC)" />
-      </Svg>
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+      <Animated.View style={[{ position: 'absolute', top: -30, left: -30, right: -30, bottom: -30 }, drift]}>
+        <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <Defs>
+            <RadialGradient id="aA" cx="10" cy="4" r="60" gradientUnits="userSpaceOnUse">
+              <Stop offset="0" stopColor={c.auroraA} stopOpacity="0.40" />
+              <Stop offset="1" stopColor={c.auroraA} stopOpacity="0" />
+            </RadialGradient>
+            <RadialGradient id="aB" cx="100" cy="30" r="55" gradientUnits="userSpaceOnUse">
+              <Stop offset="0" stopColor={c.auroraB} stopOpacity="0.16" />
+              <Stop offset="1" stopColor={c.auroraB} stopOpacity="0" />
+            </RadialGradient>
+            <RadialGradient id="aC" cx="30" cy="100" r="60" gradientUnits="userSpaceOnUse">
+              <Stop offset="0" stopColor={c.auroraC} stopOpacity="0.16" />
+              <Stop offset="1" stopColor={c.auroraC} stopOpacity="0" />
+            </RadialGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100" height="100" fill="url(#aA)" />
+          <Rect x="0" y="0" width="100" height="100" fill="url(#aB)" />
+          <Rect x="0" y="0" width="100" height="100" fill="url(#aC)" />
+        </Svg>
+      </Animated.View>
     </View>
   );
 }

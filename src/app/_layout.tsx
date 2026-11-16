@@ -1,4 +1,4 @@
-import { SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
+import { Outfit_600SemiBold, Outfit_700Bold } from '@expo-google-fonts/outfit';
 import {
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
@@ -56,8 +56,8 @@ function Navigator({ fontsReady }: { fontsReady: boolean }) {
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceGrotesk_600SemiBold,
-    SpaceGrotesk_700Bold,
+    Outfit_600SemiBold,
+    Outfit_700Bold,
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
