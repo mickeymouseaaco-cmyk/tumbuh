@@ -72,7 +72,11 @@ export function useAdmin() {
   };
 }
 
-/** Pick a photo from the phone (web/Safari): resized to ≤ 900 px JPEG and returned as a data URL. */
+/**
+ * Pick a photo from the phone (web/Safari): resized to ≤ 900 px JPEG and returned as a data URL.
+ * The file input is attached to the page while it's open: iPhone Safari drops the "change" event
+ * of an input that isn't in the document, so the chosen photo would never arrive.
+ */
 export function pickPhoto(): Promise<string | null> {
   const doc = (globalThis as any).document;
   if (Platform.OS !== 'web' || !doc) return Promise.resolve(null);
@@ -80,23 +84,43 @@ export function pickPhoto(): Promise<string | null> {
     const input = doc.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) return resolve(null);
-      const url = URL.createObjectURL(file);
-      const img = new (globalThis as any).Image();
-      img.onload = () => {
-        const k = Math.min(1, 900 / Math.max(img.width, img.height));
-        const canvas = doc.createElement('canvas');
-        canvas.width = Math.round(img.width * k);
-        canvas.height = Math.round(img.height * k);
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
-      };
-      img.onerror = () => resolve(null);
-      img.src = url;
+    input.style.cssText = 'position:fixed;left:-1000px;top:0;width:1px;height:1px;opacity:0;';
+    doc.body.appendChild(input);
+    let done = false;
+    const finish = (v: string | null) => {
+      if (done) return;
+      done = true;
+      input.remove();
+      resolve(v);
     };
+    // the picker was closed without choosing (supported in recent Safari)
+    input.addEventListener('cancel', () => finish(null));
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (!file) return finish(null);
+      // read the file, then shrink it on a canvas; if the photo can't be decoded for resizing, keep it as is
+      const reader = new (globalThis as any).FileReader();
+      reader.onload = () => {
+        const raw = reader.result as string;
+        const img = new (globalThis as any).Image();
+        img.onload = () => {
+          try {
+            const k = Math.min(1, 900 / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+            const canvas = doc.createElement('canvas');
+            canvas.width = Math.max(1, Math.round((img.naturalWidth || img.width) * k));
+            canvas.height = Math.max(1, Math.round((img.naturalHeight || img.height) * k));
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            finish(canvas.toDataURL('image/jpeg', 0.8));
+          } catch {
+            finish(raw);
+          }
+        };
+        img.onerror = () => finish(raw);
+        img.src = raw;
+      };
+      reader.onerror = () => finish(null);
+      reader.readAsDataURL(file);
+    });
     input.click();
   });
 }
