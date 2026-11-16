@@ -5,7 +5,7 @@ import Animated, { Extrapolation, interpolate, useAnimatedStyle, useReducedMotio
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { BabyHead, MOUTH_OFFSET } from '@/components/mascot';
+import { TumbuhBaby, type BabyGender, type BabyPose } from '@/components/tumbuh-baby';
 import { MouthExplorer } from '@/components/mouth';
 import { Display, PressableScale, T } from '@/components/ui';
 import { fill } from '@/lib/content';
@@ -13,18 +13,19 @@ import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
 import { motion, useTheme } from '@/theme';
 
-export type HeadRect = { x: number; y: number; size: number };
+/** The mascot on screen (window coordinates) and where its mouth is inside it. */
+export type HeadRect = { x: number; y: number; width: number; height: number; mouth: { x: number; y: number; w: number }; gender: BabyGender; pose: BabyPose };
 
 /**
- * Tap the baby's head → the camera flies into the open mouth.
- * 0 → 0.8: the head scales up around its mouth until the mouth fills the screen, while the room fades out.
+ * Tap the mascot → the camera flies into its open mouth.
+ * 0 → 0.8: the character scales up around its mouth until the mouth fills the screen, while the room fades out.
  * 0.35 → 0.75: the mouth's warm dark inside washes over everything.
  * 0.7 → 1: the inside-the-mouth view settles in.
  * Closing plays it backwards. With Reduce Motion it's a simple cross-fade.
  */
 export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClose: () => void }) {
   const { c } = useTheme();
-  const { t, name, gender, erupted, age } = useStore();
+  const { t, name } = useStore();
   const { width: W, height: H } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
@@ -47,13 +48,15 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
     setTimeout(onClose, ms + 30);
   };
 
-  const o = origin ?? { x: 0, y: 0, size: 1 };
-  const hx = o.x + o.size / 2;
-  const hy = o.y + o.size / 2;
-  const mouthY = o.size * MOUTH_OFFSET.y;
-  const S1 = (W * 1.25) / (o.size * 0.28); // mouth (≈28% of the head) grows past the screen width
-  const tx = W / 2 - hx;
-  const ty = H * 0.45 - hy - mouthY * S1;
+  const o: HeadRect = origin ?? { x: 0, y: 0, width: 1, height: 1, mouth: { x: 0.5, y: 0.5, w: 1 }, gender: 'boy', pose: 'wave' };
+  const cx = o.x + o.width / 2;
+  const cy = o.y + o.height / 2;
+  // mouth offset from the character's centre (transforms scale around the centre)
+  const dx = o.mouth.x - o.width / 2;
+  const dy = o.mouth.y - o.height / 2;
+  const S1 = (W * 1.25) / Math.max(1, o.mouth.w); // the mouth grows past the screen width
+  const tx = W / 2 - cx - dx * S1;
+  const ty = H * 0.45 - cy - dy * S1;
 
   const headStyle = useAnimatedStyle(() => {
     const z = interpolate(p.value, [0, 0.8], [0, 1], Extrapolation.CLAMP);
@@ -77,8 +80,8 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
       <View style={{ flex: 1 }}>
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.bg }, roomStyle]} />
 
-        <Animated.View style={[{ position: 'absolute', left: o.x, top: o.y, width: o.size, height: o.size }, headStyle]}>
-          <BabyHead size={o.size} erupted={erupted} age={age} gender={gender} />
+        <Animated.View style={[{ position: 'absolute', left: o.x, top: o.y, width: o.width, height: o.height }, headStyle]}>
+          <TumbuhBaby gender={o.gender} pose={o.pose} height={o.height} />
         </Animated.View>
 
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, cavityStyle]}>

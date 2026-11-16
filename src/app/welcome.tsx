@@ -4,7 +4,8 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View 
 import Animated, { FadeIn, FadeInLeft, FadeInRight, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BabyPortrait, TeethHalo } from '@/components/mascot';
+import { TeethHalo } from '@/components/mascot';
+import { TumbuhBaby } from '@/components/tumbuh-baby';
 import { Button, Display, PressableScale, T } from '@/components/ui';
 import { fill } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
@@ -133,7 +134,12 @@ export default function Welcome() {
                           borderColor: on ? c.accent : c.border, backgroundColor: on ? c.accentSoft : c.surface,
                           boxShadow: on ? `0 0 22px ${c.glow}` : undefined,
                         }}>
-                        <BabyPortrait gender={g} size={96} still={!on} />
+                        {/* the chosen child waves hello */}
+                        <View style={{ height: 124, justifyContent: 'flex-end' }}>
+                          <Animated.View key={on ? 'on' : 'off'} entering={FadeIn.duration(motion.base)}>
+                            <TumbuhBaby gender={g} pose={on ? 'wave' : 'master'} height={120} />
+                          </Animated.View>
+                        </View>
                         <T style={{ fontFamily: fonts.semi, fontSize: 16, color: on ? c.accentText : c.text }}>{g === 'boy' ? t.boy : t.girl}</T>
                       </PressableScale>
                     );

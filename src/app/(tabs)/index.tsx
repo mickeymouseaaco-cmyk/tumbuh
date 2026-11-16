@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { FluorideCard, fluorideIsDue } from '@/components/fluoride-card';
-import { TeethHalo } from '@/components/mascot';
+import { TeethHalo, haloFigure } from '@/components/mascot';
 import { MouthZoom, type HeadRect } from '@/components/mouth-zoom';
 import { Card, Display, Eyebrow, H2, PressableScale, Screen, T, ToothIcon, enter } from '@/components/ui';
 import { checklist, fill, tipFor } from '@/lib/content';
@@ -93,8 +93,11 @@ export default function Home() {
   const [zoom, setZoom] = useState<HeadRect | null>(null);
   const openMouth = () => {
     haptic.soft();
-    // The head sits 28px inside the halo on every side.
-    haloRef.current?.measureInWindow((x, y, w) => setZoom({ x: x + 28, y: y + 28, size: w - 56 }));
+    // fly into the mascot's mouth (the boy's, while both children are shown)
+    const f = haloFigure(HALO, gender);
+    haloRef.current?.measureInWindow((x, y) =>
+      setZoom({ x: x + f.x, y: y + f.y, width: f.width, height: f.height, mouth: f.mouth, gender: gender || 'boy', pose: f.pose }),
+    );
   };
 
   const step = (d: number) => {
