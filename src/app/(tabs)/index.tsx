@@ -16,6 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { FluorideCard, fluorideIsDue } from '@/components/fluoride-card';
 import { TeethHalo } from '@/components/mascot';
 import { MouthZoom, type HeadRect } from '@/components/mouth-zoom';
 import { Card, Display, Eyebrow, H2, PressableScale, Screen, T, ToothIcon, enter } from '@/components/ui';
@@ -76,7 +77,7 @@ function CheckRow({ label, done, onPress }: { label: string; done: boolean; onPr
 
 export default function Home() {
   const { c } = useTheme();
-  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender } = useStore();
+  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender, fluoride } = useStore();
   const count = Object.keys(erupted).length;
   const { due, next } = dueAndNext(age, erupted, lang);
   const items = checklist(lang, count > 0 || age >= 6);
@@ -85,6 +86,8 @@ export default function Home() {
   const mint = tint(c, 'mint');
   const butter = tint(c, 'butter');
   const lilac = tint(c, 'lilac');
+  // when fluoride is due it moves up, right under the baby
+  const fluorideTop = fluorideIsDue(fluoride, count > 0);
 
   const haloRef = useRef<View>(null);
   const [zoom, setZoom] = useState<HeadRect | null>(null);
@@ -160,6 +163,7 @@ export default function Home() {
         </View>
       </Card>
       <MouthZoom origin={zoom} onClose={() => setZoom(null)} />
+      {fluorideTop ? <FluorideCard index={2} /> : null}
 
       {/* Coming in now */}
       <Animated.View entering={enter(2)} style={{ gap: 10 }}>
@@ -226,6 +230,8 @@ export default function Home() {
           </Animated.View>
         ) : null}
       </Card>
+
+      {!fluorideTop ? <FluorideCard index={4} /> : null}
 
       {/* Tip */}
       <Animated.View entering={enter(4)} style={{ flexDirection: 'row', gap: 14, padding: 20, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: butter.bg }}>

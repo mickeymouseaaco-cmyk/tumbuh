@@ -287,7 +287,7 @@ export const learn: Record<Lang, LearnSection[]> = {
       items: [
         { title: 'Berapa banyak ubat gigi?', points: ['Bawah 3 tahun: sapuan nipis, sebesar sebutir beras.', '3 hingga 6 tahun: sebesar sebiji kacang pea.', 'Guna ubat gigi berfluorida (1000 ppm atau lebih) — fluorida bantu kuatkan gigi.'] },
         { title: 'Ludah, jangan bilas', points: ['Lap buih yang berlebihan. Tak perlu kumur dengan banyak air — biar fluorida tinggal di gigi.', 'Simpan ubat gigi jauh dari capaian anak.'] },
-        { title: 'Sapuan fluorida di klinik', points: ['Doktor gigi boleh sapu varnis fluorida untuk kuatkan gigi dan cegah gigi berlubang.', 'Cepat, tak sakit, dan selamat untuk bayi.'] },
+        { title: 'Sapuan fluorida di klinik', points: ['Doktor gigi sapu varnis fluorida setiap 6 bulan untuk kuatkan gigi dan cegah gigi berlubang — tandakan dan set peringatan di Utama.', 'Cepat, tak sakit, dan selamat untuk bayi.'] },
       ],
     },
     {
@@ -330,7 +330,7 @@ export const learn: Record<Lang, LearnSection[]> = {
       items: [
         { title: 'How much toothpaste?', points: ['Under 3: a thin smear, the size of a grain of rice.', '3 to 6 years: a pea-sized amount.', 'Use fluoride toothpaste (1000 ppm or more) — fluoride helps make teeth stronger.'] },
         { title: "Spit, don't rinse", points: ['Wipe away extra foam. No need to rinse with lots of water — let the fluoride stay on the teeth.', 'Keep toothpaste out of reach.'] },
-        { title: 'Fluoride varnish at the clinic', points: ['Dentists can paint fluoride varnish on teeth to strengthen them and prevent decay.', 'Quick, painless and safe for babies.'] },
+        { title: 'Fluoride varnish at the clinic', points: ['Dentists paint fluoride varnish on teeth every 6 months to strengthen them and prevent decay — log it and set a reminder on Home.', 'Quick, painless and safe for babies.'] },
       ],
     },
     {

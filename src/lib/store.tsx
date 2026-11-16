@@ -12,10 +12,11 @@ type Saved = {
   age: number; // months, 0–36
   erupted: Record<string, boolean>; // tooth id → in
   checks: Record<string, Record<string, boolean>>; // 'YYYY-MM-DD' → item key → done
+  fluoride: string[]; // 'YYYY-MM-DD' of each fluoride varnish at the clinic, oldest first
 };
 
 const KEY = 'tumbuh:v1';
-const initial: Saved = { onboarded: false, lang: 'bm', babyName: '', gender: '', age: 6, erupted: {}, checks: {} };
+const initial: Saved = { onboarded: false, lang: 'bm', babyName: '', gender: '', age: 6, erupted: {}, checks: {}, fluoride: [] };
 
 export const today = () => {
   const d = new Date();
@@ -38,6 +39,8 @@ type Ctx = Saved & {
   toggleTooth: (id: string) => void;
   toggleCheck: (key: string) => void;
   todayChecks: Record<string, boolean>;
+  logFluoride: (date: string) => void;
+  removeFluoride: (date: string) => void;
 };
 
 const StoreContext = createContext<Ctx | null>(null);
@@ -86,6 +89,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           else erupted[id] = true;
           return { ...d, erupted };
         }),
+      logFluoride: (date) => update((d) => ({ ...d, fluoride: [...new Set([...d.fluoride, date])].sort() })),
+      removeFluoride: (date) => update((d) => ({ ...d, fluoride: d.fluoride.filter((x) => x !== date) })),
       toggleCheck: (key) =>
         update((d) => {
           const cur = d.checks[day] ?? {};
