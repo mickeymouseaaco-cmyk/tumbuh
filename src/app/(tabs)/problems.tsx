@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProblemEditor } from '@/components/problem-editor';
 import { ProblemPhoto, SmartStack, TAG_ICON, TAG_TINT } from '@/components/smart-stack';
 import { Bullet, Disclaimer, Display, Eyebrow, PressableScale, Screen, T, enter } from '@/components/ui';
-import { problemStacks, problems, urgentList, type Problem } from '@/lib/content';
+import { problemStacks, problems, urgentList, type Problem, type Tag } from '@/lib/content';
 import { exportAdmin, pickPhoto, useAdmin, type CustomProblem } from '@/lib/admin';
 import { haptic } from '@/lib/haptics';
 import { problemPhotos } from '@/lib/photos';
@@ -29,9 +29,10 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
   if (!open || !cur) return null;
   const list = open.list;
   const k = list.indexOf(cur);
-  const tt = tint(c, TAG_TINT[cur.tag]);
-  const Icon = TAG_ICON[cur.tag];
-  const tagLabel = cur.tag === 'ok' ? t.fOk : cur.tag === 'check' ? t.fCheck : t.fUrgent;
+  const level = admin.tagOf(cur);
+  const tt = tint(c, TAG_TINT[level]);
+  const Icon = TAG_ICON[level];
+  const tagLabel = level === 'ok' ? t.fOk : level === 'check' ? t.fCheck : t.fUrgent;
   const credit = admin.noPhoto.includes(cur.id) || admin.photos[cur.id] ? undefined : problemPhotos[cur.id]?.credit;
   const step = (d: number) => {
     haptic.tap();
@@ -56,7 +57,7 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
         <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 32 }} showsVerticalScrollIndicator={false}>
           <Animated.View key={cur.id} entering={FadeIn.duration(motion.base)}>
             <View style={{ height: 300, overflow: 'hidden' }}>
-              <ProblemPhoto p={cur} height={300} iconSize={56} />
+              <ProblemPhoto p={{ ...cur, tag: level }} height={300} iconSize={56} />
             </View>
             {credit ? <T style={{ fontSize: 11, color: c.textMuted, paddingHorizontal: 20, paddingTop: 6 }}>{credit}</T> : null}
             {admin.enabled ? (
@@ -104,6 +105,31 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
                     {armed === 'item' ? (bm ? 'Tekan lagi untuk buang' : 'Tap again to remove') : bm ? 'Buang keadaan ini' : 'Remove this condition'}
                   </T>
                 </PressableScale>
+              </View>
+            ) : null}
+            {admin.enabled ? (
+              // TEMPORARY: change how serious this condition is
+              <View style={{ paddingHorizontal: 20, paddingTop: 14, gap: 8 }}>
+                <Eyebrow color={c.textMuted}>{bm ? 'Tukar tahap' : 'Change level'}</Eyebrow>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {(['urgent', 'check', 'ok'] as Tag[]).map((g) => {
+                    const on = level === g;
+                    const gt = tint(c, TAG_TINT[g]);
+                    const GIcon = TAG_ICON[g];
+                    return (
+                      <PressableScale key={g} accessibilityRole="radio" accessibilityState={{ checked: on }}
+                        onPress={() => {
+                          if (on) return;
+                          haptic.tap();
+                          admin.setTag(cur.id, g);
+                        }}
+                        style={{ ...pill, backgroundColor: on ? gt.fg : c.surface, borderColor: on ? gt.fg : c.border }}>
+                        <GIcon size={15} color={on ? '#0B0A1A' : gt.fg} strokeWidth={2.4} />
+                        <T style={{ fontSize: 13, fontFamily: fonts.semi, color: on ? '#0B0A1A' : c.text }}>{g === 'ok' ? t.fOk : g === 'check' ? t.fCheck : t.fUrgent}</T>
+                      </PressableScale>
+                    );
+                  })}
+                </View>
               </View>
             ) : null}
             <View style={{ padding: 20, gap: 16, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
@@ -214,7 +240,7 @@ export default function Problems() {
             <SmartStack
               key={st.id}
               title={st[lang]}
-              items={[...st.items.filter((id) => !admin.hidden.includes(id)).map((id) => byId[id]).filter(Boolean), ...admin.custom.filter((x) => x.stack === st.id)]}
+              items={[...st.items.filter((id) => !admin.hidden.includes(id)).map((id) => byId[id]).filter(Boolean), ...admin.custom.filter((x) => x.stack === st.id)].map((x) => ({ ...x, tag: admin.tagOf(x) }))}
               onAdd={admin.enabled ? () => setAdding({ stack: st.id }) : undefined}
               autoDelay={(r * 2 + k) * 1500}
               onOpen={(p, list) => setOpen({ p, list })}

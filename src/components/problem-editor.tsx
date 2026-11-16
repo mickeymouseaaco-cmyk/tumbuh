@@ -28,7 +28,7 @@ export function ProblemEditor({ stack, editing, onClose }: { stack: string | nul
   useEffect(() => {
     if (!open) return;
     if (editing) {
-      setD({ tag: editing.tag, titleBm: editing.title.bm, titleEn: editing.title.en, term: editing.term, looksBm: editing.looks.bm, looksEn: editing.looks.en, todoBm: editing.todo.bm, todoEn: editing.todo.en });
+      setD({ tag: admin.tagOf(editing), titleBm: editing.title.bm, titleEn: editing.title.en, term: editing.term, looksBm: editing.looks.bm, looksEn: editing.looks.en, todoBm: editing.todo.bm, todoEn: editing.todo.en });
       setPhoto(admin.photos[editing.id] ?? null);
     } else {
       setD(empty);
@@ -55,6 +55,7 @@ export function ProblemEditor({ stack, editing, onClose }: { stack: string | nul
       todo: { bm: either(d.todoBm, d.todoEn), en: either(d.todoEn, d.todoBm) },
     });
     admin.setPhoto(id, photo);
+    admin.setTag(id, d.tag);
     haptic.success();
     onClose();
   };

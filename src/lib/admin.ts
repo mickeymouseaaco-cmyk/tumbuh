@@ -10,16 +10,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
-import type { Problem } from './content';
+import type { Problem, Tag } from './content';
 
 export const ADMIN_EDITING = true;
 
 export type CustomProblem = Problem & { stack: string; photo?: string };
-/** hidden: built-in conditions taken off the list; noPhoto: built-in photos taken off */
-type AdminData = { custom: CustomProblem[]; photos: Record<string, string>; hidden: string[]; noPhoto: string[] };
+/** hidden: built-in conditions taken off the list; noPhoto: built-in photos taken off; tags: changed levels */
+type AdminData = { custom: CustomProblem[]; photos: Record<string, string>; hidden: string[]; noPhoto: string[]; tags: Record<string, Tag> };
 
 const KEY = 'tumbuh:admin:v1';
-let data: AdminData = { custom: [], photos: {}, hidden: [], noPhoto: [] };
+let data: AdminData = { custom: [], photos: {}, hidden: [], noPhoto: [], tags: {} };
 let loaded = false;
 const listeners = new Set<(d: AdminData) => void>();
 
@@ -37,7 +37,7 @@ function save(next: AdminData) {
 if (ADMIN_EDITING) {
   AsyncStorage.getItem(KEY)
     .then((raw) => {
-      if (raw) data = { custom: [], photos: {}, hidden: [], noPhoto: [], ...JSON.parse(raw) };
+      if (raw) data = { custom: [], photos: {}, hidden: [], noPhoto: [], tags: {}, ...JSON.parse(raw) };
     })
     .catch(() => {})
     .finally(() => {
@@ -71,6 +71,13 @@ export function useAdmin() {
       save({ ...data, photos, noPhoto: uri ? data.noPhoto.filter((x) => x !== id) : data.noPhoto });
     },
     hidden: d.hidden,
+    tags: d.tags,
+    /** the level shown for a condition: urgent / need check / usually fine */
+    tagOf: (p: Problem): Tag => d.tags[p.id] ?? p.tag,
+    setTag: (id: string, tag: Tag) => {
+      const custom = data.custom.map((x) => (x.id === id ? { ...x, tag } : x));
+      save({ ...data, custom, tags: { ...data.tags, [id]: tag } });
+    },
     noPhoto: d.noPhoto,
     /** take a built-in condition off its list */
     hide: (id: string) => save({ ...data, hidden: [...data.hidden.filter((x) => x !== id), id] }),
@@ -82,7 +89,7 @@ export function useAdmin() {
     },
     /** undo every removal of built-in conditions and photos */
     restoreRemoved: () => save({ ...data, hidden: [], noPhoto: [] }),
-    count: d.custom.length + Object.keys(d.photos).length + d.hidden.length + d.noPhoto.length,
+    count: d.custom.length + Object.keys(d.photos).length + d.hidden.length + d.noPhoto.length + Object.keys(d.tags).length,
   };
 }
 
