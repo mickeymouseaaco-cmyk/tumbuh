@@ -1,4 +1,4 @@
-import { Camera, ChevronLeft, ChevronRight, Pencil, Phone, Send, Siren, Trash2, X } from 'lucide-react-native';
+import { Camera, ChevronLeft, ChevronRight, Pencil, Phone, RotateCcw, Send, Siren, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Modal, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -23,6 +23,8 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
   const insets = useSafeAreaInsets();
   const admin = useAdmin();
   const [p, setP] = useState<Problem | null>(null);
+  // a remove button needs a second tap, so nothing goes by accident
+  const [armed, setArmed] = useState<'photo' | 'item' | null>(null);
   const cur = p && open && open.list.includes(p) ? p : open?.p ?? null;
   if (!open || !cur) return null;
   const list = open.list;
@@ -30,15 +32,23 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
   const tt = tint(c, TAG_TINT[cur.tag]);
   const Icon = TAG_ICON[cur.tag];
   const tagLabel = cur.tag === 'ok' ? t.fOk : cur.tag === 'check' ? t.fCheck : t.fUrgent;
-  const credit = problemPhotos[cur.id]?.credit;
+  const credit = admin.noPhoto.includes(cur.id) || admin.photos[cur.id] ? undefined : problemPhotos[cur.id]?.credit;
   const step = (d: number) => {
     haptic.tap();
+    setArmed(null);
     setP(list[(k + d + list.length) % list.length]);
   };
   const close = () => {
     setP(null);
+    setArmed(null);
     onClose();
   };
+  // TEMPORARY editing tools
+  const bm = lang === 'bm';
+  const rose = tint(c, 'rose');
+  const isCustom = 'stack' in cur;
+  const hasPhoto = !!admin.photos[cur.id] || (!!problemPhotos[cur.id] && !admin.noPhoto.includes(cur.id));
+  const pill = { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6, minHeight: 40, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: c.border };
 
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" transparent={false} onRequestClose={close}>
@@ -52,32 +62,48 @@ function ProblemSheet({ open, onClose, onEdit }: { open: { p: Problem; list: Pro
             {admin.enabled ? (
               // TEMPORARY editing tools (lib/admin.ts)
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20, paddingTop: 12 }}>
-                <PressableScale accessibilityRole="button" onPress={async () => { const uri = await pickPhoto(); if (uri) admin.setPhoto(cur.id, uri); }}
+                <PressableScale accessibilityRole="button" onPress={async () => { setArmed(null); const uri = await pickPhoto(); if (uri) admin.setPhoto(cur.id, uri); }}
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 40, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.accent }}>
                   <Camera size={16} color={c.onAccent} />
                   <T style={{ fontSize: 13, fontFamily: fonts.semi, color: c.onAccent }}>{lang === 'bm' ? 'Tambah / tukar foto' : 'Add / change photo'}</T>
                 </PressableScale>
-                {admin.photos[cur.id] && !('stack' in cur) ? (
-                  <PressableScale accessibilityRole="button" onPress={() => admin.setPhoto(cur.id, null)}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 40, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
-                    <Trash2 size={16} color={c.onRose} />
-                    <T style={{ fontSize: 13, color: c.onRose }}>{lang === 'bm' ? 'Buang foto baru' : 'Remove new photo'}</T>
+                {hasPhoto ? (
+                  <PressableScale accessibilityRole="button"
+                    onPress={() => {
+                      if (armed !== 'photo') return setArmed('photo');
+                      setArmed(null);
+                      if (isCustom || !problemPhotos[cur.id]) admin.setPhoto(cur.id, null);
+                      else admin.dropBuiltInPhoto(cur.id);
+                      haptic.soft();
+                    }}
+                    style={{ ...pill, backgroundColor: armed === 'photo' ? rose.fg : c.surface }}>
+                    <Trash2 size={16} color={armed === 'photo' ? '#0B0A1A' : c.onRose} />
+                    <T style={{ fontSize: 13, color: armed === 'photo' ? '#0B0A1A' : c.onRose }}>
+                      {armed === 'photo' ? (bm ? 'Tekan lagi untuk buang' : 'Tap again to remove') : bm ? 'Buang foto' : 'Remove photo'}
+                    </T>
                   </PressableScale>
                 ) : null}
-                {'stack' in cur ? (
-                  <>
-                    <PressableScale accessibilityRole="button" onPress={() => { close(); onEdit(cur as CustomProblem); }}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 40, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
-                      <Pencil size={16} color={c.text} />
-                      <T style={{ fontSize: 13 }}>{lang === 'bm' ? 'Ubah' : 'Edit'}</T>
-                    </PressableScale>
-                    <PressableScale accessibilityRole="button" onPress={() => { admin.remove(cur.id); close(); }}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 40, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
-                      <Trash2 size={16} color={c.onRose} />
-                      <T style={{ fontSize: 13, color: c.onRose }}>{lang === 'bm' ? 'Padam' : 'Delete'}</T>
-                    </PressableScale>
-                  </>
+                {isCustom ? (
+                  <PressableScale accessibilityRole="button" onPress={() => { close(); onEdit(cur as CustomProblem); }} style={{ ...pill, backgroundColor: c.surface }}>
+                    <Pencil size={16} color={c.text} />
+                    <T style={{ fontSize: 13 }}>{bm ? 'Ubah' : 'Edit'}</T>
+                  </PressableScale>
                 ) : null}
+                <PressableScale accessibilityRole="button"
+                  onPress={() => {
+                    if (armed !== 'item') return setArmed('item');
+                    setArmed(null);
+                    if (isCustom) admin.remove(cur.id);
+                    else admin.hide(cur.id);
+                    haptic.soft();
+                    close();
+                  }}
+                  style={{ ...pill, backgroundColor: armed === 'item' ? rose.fg : c.surface }}>
+                  <Trash2 size={16} color={armed === 'item' ? '#0B0A1A' : c.onRose} />
+                  <T style={{ fontSize: 13, color: armed === 'item' ? '#0B0A1A' : c.onRose }}>
+                    {armed === 'item' ? (bm ? 'Tekan lagi untuk buang' : 'Tap again to remove') : bm ? 'Buang keadaan ini' : 'Remove this condition'}
+                  </T>
+                </PressableScale>
               </View>
             ) : null}
             <View style={{ padding: 20, gap: 16, width: '100%', maxWidth: 560, alignSelf: 'center' }}>
@@ -143,8 +169,8 @@ export default function Problems() {
           </T>
           <T style={{ fontSize: 13, lineHeight: 19, color: c.text }}>
             {lang === 'bm'
-              ? 'Tekan + untuk tambah keadaan, atau buka kad untuk tambah foto. Siap? Hantar fail kepada Claude.'
-              : 'Tap + to add a condition, or open a card to add a photo. Done? Send the file to Claude.'}
+              ? 'Tekan + untuk tambah keadaan. Buka kad untuk tambah, tukar atau buang foto/keadaan. Siap? Hantar fail kepada Claude.'
+              : 'Tap + to add a condition. Open a card to add, change or remove a photo or condition. Done? Send the file to Claude.'}
           </T>
           <PressableScale
             accessibilityRole="button"
@@ -156,6 +182,20 @@ export default function Problems() {
             <Send size={17} color={c.onAccent} />
             <T style={{ fontFamily: fonts.semi, color: c.onAccent }}>{lang === 'bm' ? 'Simpan fail untuk Claude' : 'Save file for Claude'}</T>
           </PressableScale>
+          {admin.hidden.length + admin.noPhoto.length ? (
+            <PressableScale
+              accessibilityRole="button"
+              onPress={() => {
+                haptic.soft();
+                admin.restoreRemoved();
+              }}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 42, borderRadius: radius.pill, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
+              <RotateCcw size={16} color={c.text} />
+              <T style={{ fontSize: 13, fontFamily: fonts.semi }}>
+                {lang === 'bm' ? `Pulihkan yang dibuang (${admin.hidden.length + admin.noPhoto.length})` : `Bring back removed (${admin.hidden.length + admin.noPhoto.length})`}
+              </T>
+            </PressableScale>
+          ) : null}
         </View>
       ) : null}
       <Animated.View entering={enter(1)} style={{ padding: 16, gap: 8, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: rose.bg, borderWidth: 1, borderColor: c.border }}>
@@ -174,7 +214,7 @@ export default function Problems() {
             <SmartStack
               key={st.id}
               title={st[lang]}
-              items={[...st.items.map((id) => byId[id]).filter(Boolean), ...admin.custom.filter((x) => x.stack === st.id)]}
+              items={[...st.items.filter((id) => !admin.hidden.includes(id)).map((id) => byId[id]).filter(Boolean), ...admin.custom.filter((x) => x.stack === st.id)]}
               onAdd={admin.enabled ? () => setAdding({ stack: st.id }) : undefined}
               autoDelay={(r * 2 + k) * 1500}
               onOpen={(p, list) => setOpen({ p, list })}

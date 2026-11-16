@@ -28,7 +28,7 @@ export const TAG_ICON = { ok: CircleCheck, check: Stethoscope, urgent: Siren };
 export function ProblemPhoto({ p, height, iconSize = 34 }: { p: Problem; height: number | `${number}%`; iconSize?: number }) {
   const { c } = useTheme();
   const admin = useAdmin();
-  const photo = problemPhotos[p.id];
+  const photo = admin.noPhoto.includes(p.id) ? undefined : problemPhotos[p.id];
   const tt = tint(c, TAG_TINT[p.tag]);
   // a photo added with the temporary editing tools wins (lib/admin.ts)
   const added = admin.photos[p.id];
@@ -116,11 +116,26 @@ export function SmartStack({
   );
   const dragStyle = useAnimatedStyle(() => ({ transform: [{ translateY: drag.value }] }));
 
-  const p = items[i % Math.max(1, n)];
+  const H = 210;
+  // every card in this category was removed (temporary editing tools)
+  if (!n) {
+    return (
+      <View style={{ flex: 1, gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginLeft: 4 }}>
+          <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 15, color: c.textMuted }} numberOfLines={1}>{title}</T>
+        </View>
+        <Pressable accessibilityRole="button" onPress={onAdd} disabled={!onAdd}
+          style={{ height: H, borderRadius: radius.card, borderWidth: 1, borderStyle: 'dashed', borderColor: c.border, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Plus size={26} color={c.textMuted} />
+          <T style={{ fontSize: 13, color: c.textMuted }}>{lang === 'bm' ? 'Kosong' : 'Empty'}</T>
+        </Pressable>
+      </View>
+    );
+  }
+  const p = items[i % n];
   const tt = tint(c, TAG_TINT[p.tag]);
   const Icon = TAG_ICON[p.tag];
   const tagLabel = p.tag === 'ok' ? t.fOk : p.tag === 'check' ? t.fCheck : t.fUrgent;
-  const H = 210;
   const enter = (dir === 1 ? SlideInDown : SlideInUp).duration(motion.enter).easing(motion.ease);
 
   return (

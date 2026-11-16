@@ -15,10 +15,11 @@ import type { Problem } from './content';
 export const ADMIN_EDITING = true;
 
 export type CustomProblem = Problem & { stack: string; photo?: string };
-type AdminData = { custom: CustomProblem[]; photos: Record<string, string> };
+/** hidden: built-in conditions taken off the list; noPhoto: built-in photos taken off */
+type AdminData = { custom: CustomProblem[]; photos: Record<string, string>; hidden: string[]; noPhoto: string[] };
 
 const KEY = 'tumbuh:admin:v1';
-let data: AdminData = { custom: [], photos: {} };
+let data: AdminData = { custom: [], photos: {}, hidden: [], noPhoto: [] };
 let loaded = false;
 const listeners = new Set<(d: AdminData) => void>();
 
@@ -36,7 +37,7 @@ function save(next: AdminData) {
 if (ADMIN_EDITING) {
   AsyncStorage.getItem(KEY)
     .then((raw) => {
-      if (raw) data = { custom: [], photos: {}, ...JSON.parse(raw) };
+      if (raw) data = { custom: [], photos: {}, hidden: [], noPhoto: [], ...JSON.parse(raw) };
     })
     .catch(() => {})
     .finally(() => {
@@ -60,15 +61,28 @@ export function useAdmin() {
     remove: (id: string) => {
       const photos = { ...data.photos };
       delete photos[id];
-      save({ custom: data.custom.filter((x) => x.id !== id), photos });
+      save({ ...data, custom: data.custom.filter((x) => x.id !== id), photos });
     },
     setPhoto: (id: string, uri: string | null) => {
       const photos = { ...data.photos };
       if (uri) photos[id] = uri;
       else delete photos[id];
-      save({ ...data, photos });
+      // a new photo brings back a built-in slot that was emptied
+      save({ ...data, photos, noPhoto: uri ? data.noPhoto.filter((x) => x !== id) : data.noPhoto });
     },
-    count: d.custom.length + Object.keys(d.photos).length,
+    hidden: d.hidden,
+    noPhoto: d.noPhoto,
+    /** take a built-in condition off its list */
+    hide: (id: string) => save({ ...data, hidden: [...data.hidden.filter((x) => x !== id), id] }),
+    /** take a built-in photo off (the card shows the empty placeholder) */
+    dropBuiltInPhoto: (id: string) => {
+      const photos = { ...data.photos };
+      delete photos[id];
+      save({ ...data, photos, noPhoto: [...data.noPhoto.filter((x) => x !== id), id] });
+    },
+    /** undo every removal of built-in conditions and photos */
+    restoreRemoved: () => save({ ...data, hidden: [], noPhoto: [] }),
+    count: d.custom.length + Object.keys(d.photos).length + d.hidden.length + d.noPhoto.length,
   };
 }
 
