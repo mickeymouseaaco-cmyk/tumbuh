@@ -1,4 +1,4 @@
-import { Camera, CircleCheck, Siren, Stethoscope } from 'lucide-react-native';
+import { Camera, CircleCheck, Plus, Siren, Stethoscope } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, PanResponder, Platform, Pressable, View } from 'react-native';
 import Animated, {
@@ -15,6 +15,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { T } from '@/components/ui';
 import type { Problem, Tag } from '@/lib/content';
+import { useAdmin } from '@/lib/admin';
 import { haptic } from '@/lib/haptics';
 import { problemPhotos } from '@/lib/photos';
 import { useStore } from '@/lib/store';
@@ -26,8 +27,12 @@ export const TAG_ICON = { ok: CircleCheck, check: Stethoscope, urgent: Siren };
 /** The photo for a problem, or a soft tinted placeholder until one is added. */
 export function ProblemPhoto({ p, height, iconSize = 34 }: { p: Problem; height: number | `${number}%`; iconSize?: number }) {
   const { c } = useTheme();
+  const admin = useAdmin();
   const photo = problemPhotos[p.id];
   const tt = tint(c, TAG_TINT[p.tag]);
+  // a photo added with the temporary editing tools wins (lib/admin.ts)
+  const added = admin.photos[p.id];
+  if (added) return <Image source={{ uri: added }} resizeMode="cover" style={{ width: '100%', height }} accessibilityIgnoresInvertColors />;
   if (photo) return <Image source={photo.src} resizeMode="cover" style={{ width: '100%', height }} accessibilityIgnoresInvertColors />;
   return (
     <View style={{ width: '100%', height, backgroundColor: tt.bg, alignItems: 'center', justifyContent: 'center' }}>
@@ -45,11 +50,14 @@ export function SmartStack({
   title,
   items,
   onOpen,
+  onAdd,
   autoDelay = 0,
 }: {
   title: string;
   items: Problem[];
   onOpen: (p: Problem, list: Problem[]) => void;
+  /** TEMPORARY editing tools: show a "+" next to the title */
+  onAdd?: () => void;
   autoDelay?: number;
 }) {
   const { c } = useTheme();
@@ -108,7 +116,7 @@ export function SmartStack({
   );
   const dragStyle = useAnimatedStyle(() => ({ transform: [{ translateY: drag.value }] }));
 
-  const p = items[i];
+  const p = items[i % Math.max(1, n)];
   const tt = tint(c, TAG_TINT[p.tag]);
   const Icon = TAG_ICON[p.tag];
   const tagLabel = p.tag === 'ok' ? t.fOk : p.tag === 'check' ? t.fCheck : t.fUrgent;
@@ -117,7 +125,22 @@ export function SmartStack({
 
   return (
     <View style={{ flex: 1, gap: 8 }}>
-      <T style={{ fontFamily: fonts.display, fontSize: 15, color: c.textMuted, marginLeft: 4 }}>{title}</T>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginLeft: 4 }}>
+        <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 15, color: c.textMuted }} numberOfLines={1}>{title}</T>
+        {onAdd ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`+ ${title}`}
+            onPress={() => {
+              haptic.tap();
+              onAdd();
+            }}
+            hitSlop={8}
+            style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 12px ${c.glow}` }}>
+            <Plus size={18} color={c.onAccent} strokeWidth={2.8} />
+          </Pressable>
+        ) : null}
+      </View>
       <View
         {...pan.panHandlers}
         style={[{ height: H + 14 }, Platform.OS === 'web' ? ({ touchAction: 'none' } as object) : null]}>
