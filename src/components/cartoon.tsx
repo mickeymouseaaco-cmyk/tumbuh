@@ -13,8 +13,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SvgXml } from 'react-native-svg';
 
+import { TumbuhBaby, babyArt } from '@/components/tumbuh-baby';
 import { T } from '@/components/ui';
 import { registry, scenes, type Layer } from '@/lib/scenes';
+import { useStore } from '@/lib/store';
 import { fonts } from '@/theme';
 
 /** One layer of a scene: a part (or a short label) that may move, turn, scale or fade. */
@@ -65,6 +67,18 @@ function SceneLayer({ L }: { L: Layer }) {
   });
 
   const k = L.s ?? 1;
+  const { gender } = useStore();
+  if (L.mascot) {
+    // the mascot is placed by its mouth, and turns around it
+    const g = gender === 'girl' ? 'girl' : 'boy';
+    const h = L.h ?? 176;
+    const { mouth } = babyArt(g, L.mascot, h);
+    return (
+      <Animated.View style={[{ position: 'absolute', left: L.x - mouth.x, top: L.y - mouth.y, transformOrigin: `${mouth.x}px ${mouth.y}px` }, style]}>
+        <TumbuhBaby gender={g} pose={L.mascot} height={h} />
+      </Animated.View>
+    );
+  }
   return (
     <Animated.View style={[{ position: 'absolute', left: L.x, top: L.y, transformOrigin: L.origin ?? 'center' }, style]}>
       {L.text ? (
