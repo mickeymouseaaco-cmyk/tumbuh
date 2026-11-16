@@ -5,20 +5,24 @@ import { ScrollView, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition, ReduceMotion, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Image } from 'react-native';
+
 import { Cartoon } from '@/components/cartoon';
 import { LearnVisual, TagBadge } from '@/components/learn-visual';
 import { TumbuhBaby } from '@/components/tumbuh-baby';
 import { Aurora, Disclaimer, Display, PressableScale, ProgressBar, T, enter } from '@/components/ui';
 import { fill, learn, learnCards, topicMeta, type LearnCard } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
+import { sceneArt } from '@/lib/scene-art';
 import { useStore } from '@/lib/store';
 import { motion, radius, tone, typo, useTheme } from '@/theme';
 
 /** One picture card. Tap it once you have understood it: the tick pops and the card turns mint. */
 function LessonCard({ card, got, onToggle }: { card: LearnCard; got: boolean; onToggle: () => void }) {
   const { c } = useTheme();
-  const { t, lang } = useStore();
+  const { t, lang, gender } = useStore();
   const ok = tone(c, 'success');
+  const art = sceneArt(gender, card.v);
   const pop = useSharedValue(1);
   useEffect(() => {
     if (!got) return;
@@ -36,10 +40,15 @@ function LessonCard({ card, got, onToggle }: { card: LearnCard; got: boolean; on
       accessibilityHint={t.markGot}
       onPress={onToggle}
       style={{ borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: got ? ok.bg : c.surface, borderWidth: 1, borderColor: got ? ok.fg : c.border, overflow: 'hidden' }}>
-      <View style={{ height: 116, alignItems: 'center', justifyContent: 'center', backgroundColor: c.surfaceAlt }}>
-        <View style={{ opacity: card.tag === 'dont' ? 0.75 : 1 }}>
-          <LearnVisual v={card.v} />
-        </View>
+      <View style={{ height: 124, alignItems: 'center', justifyContent: 'center', backgroundColor: c.surfaceAlt }}>
+        {art ? (
+          // a painted picture fills the whole picture area
+          <Image source={art} resizeMode="cover" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: card.tag === 'dont' ? 0.75 : 1 }} accessibilityIgnoresInvertColors />
+        ) : (
+          <View style={{ opacity: card.tag === 'dont' ? 0.75 : 1 }}>
+            <LearnVisual v={card.v} />
+          </View>
+        )}
         {card.tag === 'dont' ? (
           <View style={{ position: 'absolute', width: 96, height: 3, borderRadius: 2, backgroundColor: c.onRose, transform: [{ rotate: '-35deg' }], opacity: 0.9 }} />
         ) : null}

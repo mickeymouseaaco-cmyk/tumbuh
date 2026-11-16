@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -15,6 +15,7 @@ import { SvgXml } from 'react-native-svg';
 
 import { TumbuhBaby, babyArt } from '@/components/tumbuh-baby';
 import { T } from '@/components/ui';
+import { sceneArt } from '@/lib/scene-art';
 import { registry, scenes, type Layer } from '@/lib/scenes';
 import { useStore } from '@/lib/store';
 import { fonts } from '@/theme';
@@ -95,6 +96,10 @@ function SceneLayer({ L }: { L: Layer }) {
  * The 120×96 stage is scaled by `scale`. Everything holds still when Reduce Motion is on.
  */
 export function Cartoon({ name, scale = 1 }: { name: string; scale?: number }) {
+  const { gender } = useStore();
+  const art = sceneArt(gender, name);
+  // a finished painted picture wins over the layered scene (lib/scene-art.ts)
+  if (art) return <Image source={art} resizeMode="cover" style={{ width: 120 * scale, height: 96 * scale }} accessibilityIgnoresInvertColors />;
   const layers = scenes[name] ?? scenes.brush;
   return (
     <View style={{ width: 120 * scale, height: 96 * scale, alignItems: 'center', justifyContent: 'center' }}>
