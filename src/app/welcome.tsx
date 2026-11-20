@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TeethHalo } from '@/components/mascot';
 import { TumbuhBaby } from '@/components/tumbuh-baby';
+import { SignInSheet, useCloud } from '@/components/account';
 import { Aurora, Button, Display, PressableScale, T } from '@/components/ui';
 import { fill } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
@@ -22,6 +23,8 @@ const langs = [
 
 export default function Welcome() {
   const { c } = useTheme();
+  const cloud = useCloud();
+  const [signIn, setSignIn] = useState(false);
   const { t, lang, setLang, babyName, setName, name, age, setAge, addAge, finishWelcome, gender, setGender } = useStore();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
@@ -209,10 +212,17 @@ export default function Welcome() {
             ) : (
               <Button label={t.start} onPress={finish} />
             )}
+            {step === 0 && cloud.status !== 'off' && cloud.status !== 'connecting' && !cloud.email ? (
+              // new phone? bring everything back from the account
+              <PressableScale accessibilityRole="button" onPress={() => setSignIn(true)} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}>
+                <T style={{ fontFamily: fonts.semi, fontSize: 15, color: c.accentText }}>{lang === 'bm' ? 'Sudah ada akaun? Log masuk' : 'Have an account? Sign in'}</T>
+              </PressableScale>
+            ) : null}
             {step === 0 ? <T style={{ fontSize: 12, lineHeight: 18, color: c.textMuted, textAlign: 'center' }}>{t.disclaimer}</T> : null}
           </View>
         </View>
       </View>
+      {signIn ? <SignInSheet onClose={() => setSignIn(false)} /> : null}
     </KeyboardAvoidingView>
   );
 }

@@ -24,6 +24,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { AccountButton } from '@/components/account';
 import { LogoMark } from '@/components/logo';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
@@ -258,7 +259,10 @@ export function Screen({ title, subtitle, eyebrow, top, children }: { title: str
             <LogoMark size={36} />
             <T style={{ fontFamily: fonts.displayBold, fontSize: 21, letterSpacing: 0.2, color: c.text }}>tumbuh<T style={{ fontFamily: fonts.displayBold, fontSize: 21, color: c.accent }}>.</T></T>
           </View>
-          <LangSwitch />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <AccountButton />
+            <LangSwitch />
+          </View>
         </View>
         {top}
         <Animated.View entering={enter(0)} style={{ gap: 6, marginTop: top ? 0 : 12, marginBottom: 4 }}>

@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+
+import { localChanged, startCloud } from './cloud';
 
 import { strings, type Lang, type Strings } from './content';
 
@@ -90,13 +92,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<Saved>(initial);
   const [ready, setReady] = useState(false);
 
+  // the latest data, for the cloud sync (lib/cloud.ts); and whether the next change came from outside
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const quiet = useRef(true);
+
   useEffect(() => {
     AsyncStorage.getItem(KEY)
       .then((raw) => {
         if (raw) setData(migrate(JSON.parse(raw)));
       })
       .catch(() => {})
-      .finally(() => setReady(true));
+      .finally(() => {
+        setReady(true);
+        startCloud({
+          getJson: () => JSON.stringify(dataRef.current),
+          apply: (json) => {
+            try {
+              quiet.current = true;
+              setData(migrate(JSON.parse(json)));
+            } catch {}
+          },
+          reset: () => {
+            quiet.current = true;
+            setData(initial);
+          },
+          hasData: () => dataRef.current.onboarded,
+        });
+      });
   }, []);
 
   useEffect(() => {
@@ -107,6 +130,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return { ...k, checks: Object.fromEntries(keep.map((d) => [d, k.checks[d]])) };
     });
     AsyncStorage.setItem(KEY, JSON.stringify({ ...data, kids })).catch(() => {});
+    // changes made here go to the account too; loading and changes from the account don't bounce back
+    if (quiet.current) quiet.current = false;
+    else localChanged();
   }, [data, ready]);
 
   const update = useCallback((fn: (d: Saved) => Saved) => setData((d) => fn(d)), []);

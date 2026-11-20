@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ConflictSheet } from '@/components/account';
 import { StoreProvider, useStore } from '@/lib/store';
 import { useTheme } from '@/theme';
 
@@ -50,6 +51,7 @@ function Navigator({ fontsReady }: { fontsReady: boolean }) {
         <Stack.Screen name="welcome" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="learn/[id]" />
       </Stack>
+      <ConflictSheet />
     </ThemeProvider>
   );
 }
