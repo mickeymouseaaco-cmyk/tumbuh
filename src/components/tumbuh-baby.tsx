@@ -128,3 +128,44 @@ export function TumbuhPair({ height, pose = 'master', alive = false }: { height:
     </View>
   );
 }
+
+/* ---------- Home portrait ---------- */
+
+const PORTRAIT: Record<BabyGender, { src: number; /** mouth centre and width, as fractions of the square picture */ mouth: { x: number; y: number; w: number } }> = {
+  boy: { src: require('../../public/characters/tumbuh-baby/boy/portrait.webp'), mouth: { x: 0.518, y: 0.488, w: 0.156 } },
+  girl: { src: require('../../public/characters/tumbuh-baby/girl/portrait.webp'), mouth: { x: 0.513, y: 0.43, w: 0.127 } },
+};
+
+/** Where the portrait's mouth is when it's drawn `size` wide (for the tap-to-look-inside zoom). */
+export function portraitMouth(gender: BabyGender, size: number) {
+  const m = PORTRAIT[gender].mouth;
+  return { x: m.x * size, y: m.y * size, w: m.w * size };
+}
+
+/**
+ * The chosen child's smiling portrait in a circle (Utama). It breathes very gently, and does one small
+ * happy bounce when `reactKey` changes (e.g. a tooth was just marked). Still with Reduce Motion.
+ * `round={false}` draws the full square (used by the zoom, which flies into the mouth).
+ */
+export function TumbuhPortrait({ gender, size, alive = false, reactKey, round = true }: { gender: BabyGender; size: number; alive?: boolean; reactKey?: string | number; round?: boolean }) {
+  const reduce = useReducedMotion();
+  const breath = useSharedValue(0);
+  const hop = useSharedValue(0);
+  useEffect(() => {
+    if (!alive || reduce) return;
+    breath.value = withRepeat(withSequence(withTiming(1, { duration: 1800, easing: motion.breathe }), withTiming(0, { duration: 1800, easing: motion.breathe })), -1);
+  }, [alive, reduce, breath]);
+  const seen = useRef(reactKey);
+  useEffect(() => {
+    if (seen.current === reactKey) return;
+    seen.current = reactKey;
+    if (reduce) return;
+    hop.value = withSequence(withTiming(1, { duration: 160, easing: motion.ease }), withTiming(0, { duration: 340, easing: motion.pop }));
+  }, [reactKey, reduce, hop]);
+  const a = useAnimatedStyle(() => ({ transform: [{ scale: 1 + breath.value * 0.012 + hop.value * 0.05 }] }));
+  return (
+    <Animated.View style={[{ width: size, height: size, borderRadius: round ? size / 2 : 0, overflow: 'hidden' }, a]}>
+      <Image source={PORTRAIT[gender].src} style={{ width: size, height: size }} resizeMode="cover" accessibilityIgnoresInvertColors />
+    </Animated.View>
+  );
+}

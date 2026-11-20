@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
-import { TumbuhBaby, babyArt, type BabyPose } from '@/components/tumbuh-baby';
+import { TumbuhBaby, TumbuhPortrait, babyArt, portraitMouth, type BabyPose } from '@/components/tumbuh-baby';
 import { motion, useTheme } from '@/theme';
 
 export type Gender = '' | 'boy' | 'girl';
@@ -32,9 +32,11 @@ export function haloFigure(size: number, gender: Gender, mood: 'wave' | 'smile' 
     const y = (size - height) / 2;
     return { pose: 'master' as BabyPose, x, y, width: boy.width, height, mouth: boy.mouth };
   }
-  const height = size * 0.84;
-  const a = babyArt(gender, mood, height);
-  return { pose: mood as BabyPose, x: (size - a.width) / 2, y: (size - height) / 2, width: a.width, height, mouth: a.mouth };
+  void mood;
+  // the chosen child's smiling portrait, in a circle inside the bead ring
+  const d = size * 0.8;
+  const xy = (size - d) / 2;
+  return { pose: 'master' as BabyPose, portrait: true, x: xy, y: xy, width: d, height: d, mouth: portraitMouth(gender, d) };
 }
 
 function Bead({ on, x, y }: { on: boolean; x: number; y: number }) {
@@ -84,7 +86,7 @@ export function TeethHalo({ erupted, gender = '', size = 200, float = true, mood
       {/* stage light */}
       <View style={{ position: 'absolute', left: size * 0.12, top: size * 0.12, width: size * 0.76, height: size * 0.76, borderRadius: size, backgroundColor: c.brandSoft, boxShadow: '0 0 48px rgba(124,108,255,0.38)' }} />
       {/* a soft floor shadow so the character stands on something */}
-      <View style={{ position: 'absolute', left: size * 0.3, top: fig.y + fig.height - size * 0.035, width: size * 0.4, height: size * 0.07, borderRadius: size, backgroundColor: 'rgba(0,0,0,0.28)' }} />
+      {gender ? null : <View style={{ position: 'absolute', left: size * 0.3, top: fig.y + fig.height - size * 0.035, width: size * 0.4, height: size * 0.07, borderRadius: size, backgroundColor: 'rgba(0,0,0,0.28)' }} />}
       <Animated.View style={[{ position: 'absolute', width: size, height: size }, orbit]}>
         <Svg width={size} height={size}>
           <Circle cx={size / 2} cy={size / 2} r={r - 10} stroke={c.brand} strokeOpacity={0.4} strokeWidth={1} strokeDasharray="2 7" fill="none" />
@@ -94,9 +96,11 @@ export function TeethHalo({ erupted, gender = '', size = 200, float = true, mood
         const a = -Math.PI / 2 + (i / 20) * Math.PI * 2;
         return <Bead key={i} on={i < count} x={size / 2 + r * Math.cos(a)} y={size / 2 + r * Math.sin(a)} />;
       })}
-      <Animated.View key={`${gender}-${fig.pose}`} entering={FadeIn.duration(motion.base)} style={{ position: 'absolute', left: fig.x, top: fig.y, flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}>
+      <Animated.View key={gender || 'pair'} entering={FadeIn.duration(motion.base)} style={{ position: 'absolute', left: fig.x, top: fig.y, flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}>
         {gender ? (
-          <TumbuhBaby gender={gender} pose={fig.pose} height={fig.height} alive={float} reactKey={`${count}-${fig.pose}`} />
+          <View style={{ borderRadius: fig.width, borderWidth: 3, borderColor: c.brandSoft, margin: -3 }}>
+            <TumbuhPortrait gender={gender} size={fig.width} alive={float} reactKey={count} />
+          </View>
         ) : (
           <>
             <TumbuhBaby gender="boy" pose="master" height={fig.height} alive={float} reactKey={count} />

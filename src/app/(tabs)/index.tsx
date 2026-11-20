@@ -133,7 +133,7 @@ export default function Home() {
     // fly into the mascot's mouth (the boy's, while both children are shown)
     const f = haloFigure(HALO, gender, mood);
     haloRef.current?.measureInWindow((x, y) =>
-      setZoom({ x: x + f.x, y: y + f.y, width: f.width, height: f.height, mouth: f.mouth, gender: gender || 'boy', pose: f.pose }),
+      setZoom({ x: x + f.x, y: y + f.y, width: f.width, height: f.height, mouth: f.mouth, gender: gender || 'boy', pose: f.pose, portrait: 'portrait' in f }),
     );
   };
 
