@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ArrowRight, BookOpen, CalendarHeart, Check, Lightbulb, Minus, PartyPopper, Plus, ZoomIn } from 'lucide-react-native';
+import { ArrowRight, BookOpen, CalendarHeart, Camera, RotateCcw, Check, Lightbulb, Minus, PartyPopper, Plus, ZoomIn } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, {
@@ -25,6 +25,7 @@ import { KidSwitcher } from '@/components/kid-switcher';
 import { Card, Eyebrow, H2, PressableScale, ProgressBar, Screen, T, ToothIcon, enter } from '@/components/ui';
 import { dueBrushing } from '@/lib/reminders';
 import { checklist, fill, learn, learnCards, tipFor, topicMeta, topicsForAge } from '@/lib/content';
+import { pickPhoto } from '@/lib/admin';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
 import { dueAndNext, range } from '@/lib/teeth';
@@ -105,7 +106,7 @@ function QuickTile({ icon, title, sub, value, color, onPress, index }: { icon: R
 
 export default function Home() {
   const { c } = useTheme();
-  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender, fluoride, learned, brush } = useStore();
+  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender, fluoride, learned, brush, photo, setPhoto } = useStore();
   const count = Object.keys(erupted).length;
   const { due, next } = dueAndNext(age, erupted, lang);
   const items = checklist(lang, count > 0 || age >= 6);
@@ -142,9 +143,9 @@ export default function Home() {
   const openMouth = () => {
     haptic.soft();
     // fly into the mascot's mouth (the boy's, while both children are shown)
-    const f = haloFigure(HALO, gender, mood);
+    const f = haloFigure(HALO, gender, mood, photo);
     haloRef.current?.measureInWindow((x, y) =>
-      setZoom({ x: x + f.x, y: y + f.y, width: f.width, height: f.height, mouth: f.mouth, gender: gender || 'boy', pose: f.pose, portrait: 'portrait' in f }),
+      setZoom({ x: x + f.x, y: y + f.y, width: f.width, height: f.height, mouth: f.mouth, gender: gender || 'boy', pose: f.pose, portrait: 'portrait' in f, photo }),
     );
   };
 
@@ -157,11 +158,41 @@ export default function Home() {
     <Screen title={fill(t.teethOf, { name })} eyebrow={greeting(t)} subtitle={t.helloSub} top={<KidSwitcher />}>
       {/* Hero: the mascot is the focal point; tap to fly into the mouth */}
       <Card index={1} style={{ alignItems: 'center', gap: 14, paddingTop: 18, overflow: 'hidden' }}>
-        <Pressable accessibilityRole="button" accessibilityLabel={fill(t.tapHead, { name })} onPress={openMouth} style={{ alignItems: 'center' }}>
-          <View ref={haloRef} collapsable={false}>
-            <TeethHalo erupted={erupted} age={age} gender={gender} size={HALO} mood={mood} />
-          </View>
-        </Pressable>
+        <View style={{ width: HALO, height: HALO }}>
+          <Pressable accessibilityRole="button" accessibilityLabel={fill(t.tapHead, { name })} onPress={openMouth} style={{ alignItems: 'center' }}>
+            <View ref={haloRef} collapsable={false}>
+              <TeethHalo erupted={erupted} age={age} gender={gender} size={HALO} mood={mood} photo={photo} />
+            </View>
+          </Pressable>
+          {/* use the parent's own photo of this child */}
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel={lang === 'bm' ? `Tukar foto ${name}` : `Change ${name}'s photo`}
+            hitSlop={6}
+            onPress={async () => {
+              haptic.tap();
+              const uri = await pickPhoto(480);
+              if (uri) {
+                setPhoto(uri);
+                haptic.success();
+              }
+            }}
+            style={{ position: 'absolute', right: HALO * 0.13, bottom: HALO * 0.13, width: 44, height: 44, borderRadius: 22, backgroundColor: c.accent, borderWidth: 3, borderColor: c.surfaceSolid, alignItems: 'center', justifyContent: 'center' }}>
+            <Camera size={19} color={c.onAccent} strokeWidth={2.4} />
+          </PressableScale>
+        </View>
+        {photo ? (
+          <PressableScale
+            accessibilityRole="button"
+            onPress={() => {
+              haptic.soft();
+              setPhoto(null);
+            }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 12 }}>
+            <RotateCcw size={14} color={c.textMuted} strokeWidth={2.4} />
+            <T style={[typo.caption, { color: c.textMuted }]}>{lang === 'bm' ? 'Guna gambar kartun semula' : 'Use the cartoon again'}</T>
+          </PressableScale>
+        ) : null}
         {!gender ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {(['boy', 'girl'] as const).map((g) => (

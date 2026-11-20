@@ -21,7 +21,7 @@ const L = {
 
 function Avatar({ kid, size }: { kid: Kid; size: number }) {
   const { c } = useTheme();
-  if (kid.gender) return <TumbuhPortrait gender={kid.gender} size={size} />;
+  if (kid.photo || kid.gender) return <TumbuhPortrait gender={kid.gender || 'boy'} uri={kid.photo} size={size} />;
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: c.brandSoft, alignItems: 'center', justifyContent: 'center' }}>
       <T style={{ fontFamily: fonts.display, fontSize: size * 0.45, color: c.onBrandSoft }}>{(kid.babyName.trim()[0] ?? '?').toUpperCase()}</T>

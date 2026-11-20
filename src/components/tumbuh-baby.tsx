@@ -137,8 +137,9 @@ const PORTRAIT: Record<BabyGender, { src: number; /** mouth centre and width, as
 };
 
 /** Where the portrait's mouth is when it's drawn `size` wide (for the tap-to-look-inside zoom). */
-export function portraitMouth(gender: BabyGender, size: number) {
-  const m = PORTRAIT[gender].mouth;
+export function portraitMouth(gender: BabyGender, size: number, ownPhoto = false) {
+  // a parent's own photo: we can't know where the mouth is, so aim a little below the centre of the face
+  const m = ownPhoto ? { x: 0.5, y: 0.58, w: 0.22 } : PORTRAIT[gender].mouth;
   return { x: m.x * size, y: m.y * size, w: m.w * size };
 }
 
@@ -147,7 +148,7 @@ export function portraitMouth(gender: BabyGender, size: number) {
  * happy bounce when `reactKey` changes (e.g. a tooth was just marked). Still with Reduce Motion.
  * `round={false}` draws the full square (used by the zoom, which flies into the mouth).
  */
-export function TumbuhPortrait({ gender, size, alive = false, reactKey, round = true }: { gender: BabyGender; size: number; alive?: boolean; reactKey?: string | number; round?: boolean }) {
+export function TumbuhPortrait({ gender, size, alive = false, reactKey, round = true, uri }: { gender: BabyGender; size: number; alive?: boolean; reactKey?: string | number; round?: boolean; /** the parent's own photo, shown instead of the mascot */ uri?: string }) {
   const reduce = useReducedMotion();
   const breath = useSharedValue(0);
   const hop = useSharedValue(0);
@@ -165,7 +166,7 @@ export function TumbuhPortrait({ gender, size, alive = false, reactKey, round = 
   const a = useAnimatedStyle(() => ({ transform: [{ scale: 1 + breath.value * 0.012 + hop.value * 0.05 }] }));
   return (
     <Animated.View style={[{ width: size, height: size, borderRadius: round ? size / 2 : 0, overflow: 'hidden' }, a]}>
-      <Image source={PORTRAIT[gender].src} style={{ width: size, height: size }} resizeMode="cover" accessibilityIgnoresInvertColors />
+      <Image source={uri ? { uri } : PORTRAIT[gender].src} style={{ width: size, height: size }} resizeMode="cover" accessibilityIgnoresInvertColors />
     </Animated.View>
   );
 }

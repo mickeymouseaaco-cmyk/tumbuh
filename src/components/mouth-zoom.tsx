@@ -14,7 +14,7 @@ import { useStore } from '@/lib/store';
 import { motion, useTheme } from '@/theme';
 
 /** The mascot on screen (window coordinates) and where its mouth is inside it. */
-export type HeadRect = { x: number; y: number; width: number; height: number; mouth: { x: number; y: number; w: number }; gender: BabyGender; pose: BabyPose; portrait?: boolean };
+export type HeadRect = { x: number; y: number; width: number; height: number; mouth: { x: number; y: number; w: number }; gender: BabyGender; pose: BabyPose; portrait?: boolean; photo?: string };
 
 /**
  * Tap the mascot → the camera flies into its open mouth.
@@ -81,7 +81,7 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.bg }, roomStyle]} />
 
         <Animated.View style={[{ position: 'absolute', left: o.x, top: o.y, width: o.width, height: o.height }, headStyle]}>
-          {o.portrait ? <TumbuhPortrait gender={o.gender} size={o.width} /> : <TumbuhBaby gender={o.gender} pose={o.pose} height={o.height} />}
+          {o.portrait ? <TumbuhPortrait gender={o.gender} uri={o.photo} size={o.width} /> : <TumbuhBaby gender={o.gender} pose={o.pose} height={o.height} />}
         </Animated.View>
 
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, cavityStyle]}>

@@ -22,8 +22,8 @@ export type Gender = '' | 'boy' | 'girl';
  * Where the mascot sits inside a halo of `size` (relative to the halo's top-left), and where its mouth is.
  * Before boy/girl is chosen, both children stand together and the zoom goes into the boy's mouth.
  */
-export function haloFigure(size: number, gender: Gender, mood: 'wave' | 'smile' = 'wave') {
-  if (!gender) {
+export function haloFigure(size: number, gender: Gender, mood: 'wave' | 'smile' = 'wave', photo?: string) {
+  if (!gender && !photo) {
     const height = size * 0.72;
     const boy = babyArt('boy', 'master', height);
     const girl = babyArt('girl', 'master', height);
@@ -36,7 +36,7 @@ export function haloFigure(size: number, gender: Gender, mood: 'wave' | 'smile' 
   // the chosen child's smiling portrait, in a circle inside the bead ring
   const d = size * 0.8;
   const xy = (size - d) / 2;
-  return { pose: 'master' as BabyPose, portrait: true, x: xy, y: xy, width: d, height: d, mouth: portraitMouth(gender, d) };
+  return { pose: 'master' as BabyPose, portrait: true, x: xy, y: xy, width: d, height: d, mouth: portraitMouth(gender || 'boy', d, !!photo) };
 }
 
 function Bead({ on, x, y }: { on: boolean; x: number; y: number }) {
@@ -68,7 +68,7 @@ function Bead({ on, x, y }: { on: boolean; x: number; y: number }) {
  * that light up as teeth are marked. The mascot breathes and floats, and hops once when a new tooth is
  * marked. `mood="smile"` swaps in the happy pose (e.g. today's routine is done). Loops stop with Reduce Motion.
  */
-export function TeethHalo({ erupted, gender = '', size = 200, float = true, mood = 'wave' }: { erupted: Record<string, boolean>; age?: number; gender?: Gender; size?: number; float?: boolean; mood?: 'wave' | 'smile' }) {
+export function TeethHalo({ erupted, gender = '', size = 200, float = true, mood = 'wave', photo }: { erupted: Record<string, boolean>; age?: number; gender?: Gender; size?: number; float?: boolean; mood?: 'wave' | 'smile'; /** the parent's own photo of the child */ photo?: string }) {
   const { c } = useTheme();
   const reduce = useReducedMotion();
   const count = Object.keys(erupted).length;
@@ -79,14 +79,15 @@ export function TeethHalo({ erupted, gender = '', size = 200, float = true, mood
     spin.value = withRepeat(withTiming(360, { duration: 40000, easing: Easing.linear }), -1);
   }, [reduce, spin]);
   const orbit = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value}deg` }] }));
-  const fig = haloFigure(size, gender, mood);
+  const fig = haloFigure(size, gender, mood, photo);
+  const portrait = !!gender || !!photo;
 
   return (
     <View style={{ width: size, height: size }}>
       {/* stage light */}
       <View style={{ position: 'absolute', left: size * 0.12, top: size * 0.12, width: size * 0.76, height: size * 0.76, borderRadius: size, backgroundColor: c.brandSoft, boxShadow: '0 0 48px rgba(124,108,255,0.38)' }} />
       {/* a soft floor shadow so the character stands on something */}
-      {gender ? null : <View style={{ position: 'absolute', left: size * 0.3, top: fig.y + fig.height - size * 0.035, width: size * 0.4, height: size * 0.07, borderRadius: size, backgroundColor: 'rgba(0,0,0,0.28)' }} />}
+      {portrait ? null : <View style={{ position: 'absolute', left: size * 0.3, top: fig.y + fig.height - size * 0.035, width: size * 0.4, height: size * 0.07, borderRadius: size, backgroundColor: 'rgba(0,0,0,0.28)' }} />}
       <Animated.View style={[{ position: 'absolute', width: size, height: size }, orbit]}>
         <Svg width={size} height={size}>
           <Circle cx={size / 2} cy={size / 2} r={r - 10} stroke={c.brand} strokeOpacity={0.4} strokeWidth={1} strokeDasharray="2 7" fill="none" />
@@ -96,10 +97,10 @@ export function TeethHalo({ erupted, gender = '', size = 200, float = true, mood
         const a = -Math.PI / 2 + (i / 20) * Math.PI * 2;
         return <Bead key={i} on={i < count} x={size / 2 + r * Math.cos(a)} y={size / 2 + r * Math.sin(a)} />;
       })}
-      <Animated.View key={gender || 'pair'} entering={FadeIn.duration(motion.base)} style={{ position: 'absolute', left: fig.x, top: fig.y, flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}>
-        {gender ? (
+      <Animated.View key={photo ? 'photo' : gender || 'pair'} entering={FadeIn.duration(motion.base)} style={{ position: 'absolute', left: fig.x, top: fig.y, flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}>
+        {portrait ? (
           <View style={{ borderRadius: fig.width, borderWidth: 3, borderColor: c.brandSoft, margin: -3 }}>
-            <TumbuhPortrait gender={gender} size={fig.width} alive={float} reactKey={count} />
+            <TumbuhPortrait gender={gender || 'boy'} uri={photo} size={fig.width} alive={float} reactKey={count} />
           </View>
         ) : (
           <>

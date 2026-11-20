@@ -14,6 +14,7 @@ export type Kid = {
   erupted: Record<string, boolean>; // tooth id → in
   checks: Record<string, Record<string, boolean>>; // 'YYYY-MM-DD' → item key → done
   fluoride: string[]; // 'YYYY-MM-DD' of each fluoride varnish at the clinic, oldest first
+  photo?: string; // the parent's own photo of this child (small JPEG data URL), shown instead of the mascot
 };
 
 /** Brushing reminder times, 'HH:MM' (24 h), shared by all the children. */
@@ -62,7 +63,9 @@ type Ctx = Omit<Saved, 'kids'> & Omit<Kid, 'id'> & {
   /** Add a child and switch to them. */
   addKid: (p: { babyName: string; gender: 'boy' | 'girl'; age: number }) => void;
   /** Change the active child's name, gender or age. */
-  editKid: (id: string, p: Partial<Pick<Kid, 'babyName' | 'gender' | 'age'>>) => void;
+  editKid: (id: string, p: Partial<Pick<Kid, 'babyName' | 'gender' | 'age' | 'photo'>>) => void;
+  /** The active child's own photo (data URL), or null to go back to the mascot. */
+  setPhoto: (uri: string | null) => void;
   /** Remove a child (the last one can't be removed). */
   removeKid: (id: string) => void;
   /** A child's display name. */
@@ -168,6 +171,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       kidName: (k) => k.babyName.trim() || s.littleOne,
       setName: (n) => updateKid((k) => ({ ...k, babyName: n.slice(0, 24) })),
       setGender: (g) => updateKid((k) => ({ ...k, gender: g })),
+      photo: kid.photo,
+      setPhoto: (uri) => updateKid((k) => { const n = { ...k }; if (uri) n.photo = uri; else delete n.photo; return n; }),
       setAge: (a) => updateKid((k) => ({ ...k, age: Math.max(0, Math.min(36, a)) })),
       addAge: (n) => updateKid((k) => ({ ...k, age: Math.max(0, Math.min(36, k.age + n)) })),
       finishWelcome: () => update((d) => ({ ...d, onboarded: true })),
