@@ -20,6 +20,21 @@ const boy: Record<string, number> = {
   parent: require('../../public/learn-art/boy/parent.webp'),
   paste: require('../../public/learn-art/boy/paste.webp'),
   ppm: require('../../public/learn-art/boy/ppm.webp'),
+  bedbottle: require('../../public/learn-art/boy/bedbottle.webp'),
+  signs: require('../../public/learn-art/boy/signs.webp'),
+  fever: require('../../public/learn-art/boy/fever.webp'),
+  finger: require('../../public/learn-art/boy/finger.webp'),
+  teether: require('../../public/learn-art/boy/teether.webp'),
+  sixmonths: require('../../public/learn-art/boy/sixmonths.webp'),
+  firstvisit: require('../../public/learn-art/boy/firstvisit.webp'),
+  quick: require('../../public/learn-art/boy/quick.webp'),
+  kind: require('../../public/learn-art/boy/kind.webp'),
+  spit: require('../../public/learn-art/boy/spit.webp'),
+  varnish: require('../../public/learn-art/boy/varnish.webp'),
+  reach: require('../../public/learn-art/boy/reach.webp'),
+  cup: require('../../public/learn-art/boy/cup.webp'),
+  sweet: require('../../public/learn-art/boy/sweet.webp'),
+  water: require('../../public/learn-art/boy/water.webp'),
 };
 
 // No girl pictures yet: a girl keeps the animated Yuki scenes so the child always matches.

@@ -46,13 +46,14 @@ function LessonCard({ card, got, onToggle }: { card: LearnCard; got: boolean; on
       <View style={{ height: 124, alignItems: 'center', justifyContent: 'center', backgroundColor: c.surfaceAlt }}>
         {art ? (
           // a painted picture fills the whole picture area
-          <Image source={art} resizeMode="cover" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: card.tag === 'dont' ? 0.75 : 1 }} accessibilityIgnoresInvertColors />
+          <Image source={art} resizeMode="cover" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} accessibilityIgnoresInvertColors />
         ) : (
           <View style={{ opacity: card.tag === 'dont' ? 0.75 : 1 }}>
             <LearnVisual v={card.v} />
           </View>
         )}
-        {card.tag === 'dont' ? (
+        {/* painted pictures show their own ✓ / 🚫, so only the drawn scenes get the strike-through */}
+        {card.tag === 'dont' && !art ? (
           <View style={{ position: 'absolute', width: 96, height: 3, borderRadius: 2, backgroundColor: c.onRose, transform: [{ rotate: '-35deg' }], opacity: 0.9 }} />
         ) : null}
         {card.tag ? <TagBadge tag={card.tag} /> : null}
