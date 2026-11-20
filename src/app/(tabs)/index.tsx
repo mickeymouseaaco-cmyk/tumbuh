@@ -116,7 +116,7 @@ export default function Home() {
 
   // Learn progress, and the lesson that suits this age best (first one not finished yet)
   const totalCards = topicMeta.reduce((n, m) => n + learnCards[m.id].length, 0);
-  const learnedN = Object.keys(learned).length;
+  const learnedN = topicMeta.reduce((n, m) => n + learnCards[m.id].filter((k) => learned[`${m.id}:${k.v}`]).length, 0);
   const topicDone = (id: string) => learnCards[id].every((k) => learned[`${id}:${k.v}`]);
   const order = topicsForAge(age);
   const lessonId = order.find((id) => !topicDone(id)) ?? order[0];

@@ -545,16 +545,12 @@ export const learnCards: Record<string, LearnCard[]> = {
     { v: 'cup', tag: 'do', bm: 'Cawan dari 6 bulan', en: 'Cup from 6 months' },
     { v: 'sweet', tag: 'dont', bm: 'Elak air manis', en: 'Skip sweet drinks' },
     { v: 'water', tag: 'do', bm: 'Air kosong & susu', en: 'Water & milk' },
-    { v: 'honey', tag: 'dont', bm: 'Tiada madu bawah 1 thn', en: 'No honey under 1' },
-    { v: 'spoon', tag: 'dont', bm: 'Jangan kongsi sudu', en: "Don't share spoons" },
   ],
   teething: [
     { v: 'signs', bm: 'Air liur, gigit, meragam', en: 'Drool, chewing, fussy' },
     { v: 'fever', tag: 'warn', bm: 'Demam 38°C? Jumpa doktor', en: '38°C fever? See a doctor' },
     { v: 'finger', tag: 'do', bm: 'Urut gusi dengan jari', en: 'Rub gums with a finger' },
     { v: 'teether', tag: 'do', bm: 'Gelang gigit sejuk', en: 'Chilled teether' },
-    { v: 'gel', tag: 'dont', bm: 'Elak gel bius', en: 'No numbing gels' },
-    { v: 'amber', tag: 'dont', bm: 'Tiada rantai ambar', en: 'No amber necklaces' },
   ],
   dentist: [
     { v: 'firstvisit', tag: 'do', bm: 'Gigi pertama atau umur 1', en: 'First tooth or age 1' },

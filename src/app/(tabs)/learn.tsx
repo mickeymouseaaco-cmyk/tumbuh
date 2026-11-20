@@ -16,7 +16,8 @@ export default function Learn() {
   const { t, lang, learned } = useStore();
   const ok = tone(c, 'success');
   const total = topicMeta.reduce((n, m) => n + learnCards[m.id].length, 0);
-  const got = Object.keys(learned).length;
+  // count only cards that still exist (a ticked card may have been removed since)
+  const got = topicMeta.reduce((n, m) => n + learnCards[m.id].filter((k) => learned[`${m.id}:${k.v}`]).length, 0);
 
   return (
     <Screen title={t.learnTitle} subtitle={t.learnSub}>
