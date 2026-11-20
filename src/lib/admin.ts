@@ -98,7 +98,7 @@ export function useAdmin() {
  * The file input is attached to the page while it's open: iPhone Safari drops the "change" event
  * of an input that isn't in the document, so the chosen photo would never arrive.
  */
-export function pickPhoto(): Promise<string | null> {
+export function pickPhoto(max = 900): Promise<string | null> {
   const doc = (globalThis as any).document;
   if (Platform.OS !== 'web' || !doc) return Promise.resolve(null);
   return new Promise((resolve) => {
@@ -126,7 +126,7 @@ export function pickPhoto(): Promise<string | null> {
         const img = new (globalThis as any).Image();
         img.onload = () => {
           try {
-            const k = Math.min(1, 900 / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+            const k = Math.min(1, max / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
             const canvas = doc.createElement('canvas');
             canvas.width = Math.max(1, Math.round((img.naturalWidth || img.width) * k));
             canvas.height = Math.max(1, Math.round((img.naturalHeight || img.height) * k));

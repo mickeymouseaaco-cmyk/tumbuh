@@ -15,6 +15,7 @@ import { SvgXml } from 'react-native-svg';
 
 import { TumbuhBaby, babyArt } from '@/components/tumbuh-baby';
 import { T } from '@/components/ui';
+import { useLearnPic } from '@/components/picture-edit';
 import { sceneArt } from '@/lib/scene-art';
 import { registry, scenes, type Layer } from '@/lib/scenes';
 import { useStore } from '@/lib/store';
@@ -97,9 +98,10 @@ function SceneLayer({ L }: { L: Layer }) {
  */
 export function Cartoon({ name, scale = 1 }: { name: string; scale?: number }) {
   const { gender } = useStore();
+  const changed = useLearnPic(name);
   const art = sceneArt(gender, name);
-  // a finished painted picture wins over the layered scene (lib/scene-art.ts)
-  if (art) return <Image source={art} resizeMode="cover" style={{ width: 120 * scale, height: 96 * scale }} accessibilityIgnoresInvertColors />;
+  // a picture chosen with the editing tools, then a finished painted picture, win over the layered scene
+  if (changed || art) return <Image source={changed ? { uri: changed } : art!} resizeMode="cover" style={{ width: 120 * scale, height: 96 * scale }} accessibilityIgnoresInvertColors />;
   const layers = scenes[name] ?? scenes.brush;
   return (
     <View style={{ width: 120 * scale, height: 96 * scale, alignItems: 'center', justifyContent: 'center' }}>

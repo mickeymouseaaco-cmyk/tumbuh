@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'react-native';
 
 import { Cartoon } from '@/components/cartoon';
+import { PictureEditButtons, useLearnPic } from '@/components/picture-edit';
 import { LearnVisual, TagBadge } from '@/components/learn-visual';
 import { TumbuhBaby } from '@/components/tumbuh-baby';
 import { Aurora, Disclaimer, Display, PressableScale, ProgressBar, T, enter } from '@/components/ui';
@@ -22,7 +23,9 @@ function LessonCard({ card, got, onToggle }: { card: LearnCard; got: boolean; on
   const { c } = useTheme();
   const { t, lang, gender } = useStore();
   const ok = tone(c, 'success');
-  const art = sceneArt(gender, card.v);
+  const changed = useLearnPic(card.v);
+  const painted = sceneArt(gender, card.v);
+  const art = changed ? { uri: changed } : painted;
   const pop = useSharedValue(1);
   useEffect(() => {
     if (!got) return;
@@ -53,6 +56,7 @@ function LessonCard({ card, got, onToggle }: { card: LearnCard; got: boolean; on
           <View style={{ position: 'absolute', width: 96, height: 3, borderRadius: 2, backgroundColor: c.onRose, transform: [{ rotate: '-35deg' }], opacity: 0.9 }} />
         ) : null}
         {card.tag ? <TagBadge tag={card.tag} /> : null}
+        <PictureEditButtons scene={card.v} />
       </View>
       <View style={{ padding: 12, gap: 10, minHeight: 96, justifyContent: 'space-between' }}>
         <T style={[typo.label, { lineHeight: 19 }]}>{card[lang]}</T>

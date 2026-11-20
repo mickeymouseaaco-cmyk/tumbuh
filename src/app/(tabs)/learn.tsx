@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { Cartoon } from '@/components/cartoon';
+import { PictureEditButtons } from '@/components/picture-edit';
 import { Card, Disclaimer, PressableScale, ProgressBar, Screen, T, enter } from '@/components/ui';
 import { fill, learn, learnCards, topicMeta } from '@/lib/content';
 import { useStore } from '@/lib/store';
@@ -48,6 +49,7 @@ export default function Learn() {
                 }}>
                 <View style={{ alignItems: 'center', justifyContent: 'center', borderRadius: radius.tile, overflow: 'hidden', backgroundColor: c.surfaceAlt }}>
                   <Cartoon name={`topic-${m.id}`} scale={wide ? 1 : 1.05} />
+                  <PictureEditButtons scene={`topic-${m.id}`} />
                 </View>
                 <View style={{ gap: 8, flex: wide ? 1 : undefined, paddingHorizontal: 2 }}>
                   <T style={typo.heading}>{learn[lang][i].title}</T>
