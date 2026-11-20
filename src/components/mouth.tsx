@@ -33,7 +33,7 @@ import {
   tongueGroove,
   tonguePath,
 } from '@/lib/mouth-geometry';
-import { fdi, markerTone } from '@/lib/records';
+import { WHO_COLOR, fdi, markerTone } from '@/lib/records';
 import { useStore } from '@/lib/store';
 import { ARCH, range, statusOf, type Status } from '@/lib/teeth';
 import { fonts, motion, tone, useTheme } from '@/theme';
@@ -43,7 +43,8 @@ export const mouthHeight = (s: number) => (AH * 2 + GAP) * s;
 
 /* ---------- One tooth ---------- */
 
-export function Crown({ kind, status, s }: { kind: Kind; status: Status; s: number }) {
+/** One crown. `mark` tints the whole tooth (lavender = parent saw something, blue = dentist checked it). */
+export function Crown({ kind, status, s, mark }: { kind: Kind; status: Status; s: number; mark?: string | null }) {
   const { c } = useTheme();
   const box = boxFor(kind);
   const { w, d } = CROWN[kind];
@@ -83,6 +84,16 @@ export function Crown({ kind, status, s }: { kind: Kind; status: Status; s: numb
           <Path d={crownPath(kind)} transform="scale(0.86)" fill="none" stroke={c.gumDeep} strokeWidth={1.1} strokeDasharray="2 1.6" opacity={0.9} />
         </G>
       )}
+      {mark ? (
+        <Path
+          d={crownPath(kind)}
+          transform={`scale(${status === 'in' ? 1 : status === 'due' ? 0.62 : 0.86})`}
+          fill={mark}
+          fillOpacity={status === 'in' ? 0.6 : 0.75}
+          stroke={mark}
+          strokeWidth={1.6}
+        />
+      ) : null}
     </Svg>
   );
 }
@@ -121,7 +132,7 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
   const crownStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${rot}deg` }, { scale: grow.value }] }));
   // a small dot shows this tooth has records: violet = parent's observation, colour = dentist's finding
   const mark = markerTone(records[id]);
-  const markColor = !mark ? null : mark.by === 'parent' ? c.onBrandSoft : tone(c, mark.tone).fg;
+  const markColor = mark ? WHO_COLOR[mark.by] : null;
   const haloStyle = useAnimatedStyle(() => ({ opacity: halo.value }));
   const size = box * s;
 
@@ -150,11 +161,8 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
         />
       ) : null}
       <Animated.View style={[{ width: size, height: size }, crownStyle]}>
-        <Crown kind={kind} status={status} s={s} />
+        <Crown kind={kind} status={status} s={s} mark={markColor} />
       </Animated.View>
-      {markColor ? (
-        <View style={{ position: 'absolute', top: jaw === 'U' ? undefined : 0, bottom: jaw === 'U' ? 0 : undefined, right: 0, width: 12 * Math.max(s, 0.9), height: 12 * Math.max(s, 0.9), borderRadius: 7, backgroundColor: markColor, borderWidth: 2, borderColor: c.gumDeep }} />
-      ) : null}
     </PressableScale>
   );
 }
@@ -246,7 +254,11 @@ export function MouthExplorer({ maxWidth }: { maxWidth?: number }) {
       <T style={{ fontFamily: fonts.medium, fontSize: 13, color: c.textMuted }}>{label}</T>
     </View>
   );
-  const dot = (color: string) => <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: color, borderWidth: 2, borderColor: c.gumDeep }} />;
+  const swatch = (color: string) => (
+    <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center' }}>
+      <Crown kind="c" status="in" s={0.5} mark={color} />
+    </View>
+  );
 
   return (
     <View style={{ gap: 16, alignItems: 'center' }}>
@@ -267,8 +279,8 @@ export function MouthExplorer({ maxWidth }: { maxWidth?: number }) {
             st === 'in' ? t.legIn : st === 'due' ? t.legDue : t.legNot,
           ),
         )}
-        {recorded ? legendItem('p', dot(c.onBrandSoft), lang === 'bm' ? 'Pemerhatian ibu bapa' : 'Parent observation') : null}
-        {recorded ? legendItem('d', dot(tone(c, 'success').fg), lang === 'bm' ? 'Disahkan doktor gigi' : 'Dentist confirmed') : null}
+        {recorded ? legendItem('p', swatch(WHO_COLOR.parent), lang === 'bm' ? 'Pemerhatian ibu bapa' : 'Parent observation') : null}
+        {recorded ? legendItem('d', swatch(WHO_COLOR.dentist), lang === 'bm' ? 'Disahkan doktor gigi' : 'Dentist confirmed') : null}
       </View>
 
       <ToothSheet tooth={sel} onClose={() => setSel(null)} />

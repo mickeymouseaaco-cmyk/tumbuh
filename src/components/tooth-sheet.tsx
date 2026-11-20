@@ -18,7 +18,7 @@ import { boxFor } from '@/lib/mouth-geometry';
 import { toothAges, toothName, type Jaw, type Kind, type Side } from '@/lib/content';
 import { fmt, toKey } from '@/lib/fluoride';
 import { haptic } from '@/lib/haptics';
-import { FINDINGS, KIND_INFO, deletePhoto, fdi, findingOf, placeName, savePhoto, sorted, usePhoto, type By, type Entry } from '@/lib/records';
+import { FINDINGS, KIND_INFO, WHO_COLOR, deletePhoto, fdi, findingOf, markerTone, placeName, savePhoto, sorted, usePhoto, type By, type Entry } from '@/lib/records';
 import { useStore } from '@/lib/store';
 import { statusOf, range } from '@/lib/teeth';
 import { elevation, fonts, motion, radius, tone, typo, useTheme } from '@/theme';
@@ -109,7 +109,8 @@ function Badge({ by }: { by: By }) {
   const { lang } = useStore();
   const s = L[lang];
   const d = by === 'dentist';
-  const t = d ? tone(c, 'success') : { bg: c.brandSoft, fg: c.onBrandSoft };
+  const col = WHO_COLOR[by];
+  const t = { bg: `${col}2E`, fg: d ? '#8EDBFB' : '#CBBDFF' };
   const Icon = d ? Stethoscope : Eye;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 9, paddingVertical: 4, borderRadius: radius.pill, backgroundColor: t.bg }}>
@@ -324,7 +325,7 @@ export function ToothSheet({ tooth, onClose }: { tooth: string | null; onClose: 
             {/* header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <View style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 2, borderColor: c.accentBorder }}>
-                <Crown kind={kind} status={status} s={64 / boxFor(kind)} />
+                <Crown kind={kind} status={status} s={64 / boxFor(kind)} mark={markerTone(records[tooth]) ? WHO_COLOR[markerTone(records[tooth])!.by] : null} />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <T style={[typo.heading, { fontSize: 20, lineHeight: 25 }]}>{toothName(jaw, kind, lang)}</T>

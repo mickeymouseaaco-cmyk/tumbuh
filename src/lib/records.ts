@@ -57,6 +57,9 @@ export function placeName(jaw: Jaw, side: Side, lang: Lang) {
 /** The newest entry first. */
 export const sorted = (list: Entry[] = []) => [...list].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id.localeCompare(a.id)));
 
+/** The tooth colour on the chart says who recorded it: lavender = parent saw it, blue = dentist checked it. */
+export const WHO_COLOR: Record<By, string> = { parent: '#A78BFA', dentist: '#38BDF8' };
+
 /** Colour of the marker on the chart: the newest entry decides. */
 export function markerTone(list?: Entry[]) {
   const e = sorted(list)[0];

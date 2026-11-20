@@ -12,7 +12,7 @@ import { H2, PressableScale, T, enter } from '@/components/ui';
 import { toothName, type Jaw, type Kind, type Side } from '@/lib/content';
 import { daysUntil, fmt } from '@/lib/fluoride';
 import { haptic } from '@/lib/haptics';
-import { fdi, findingOf, sorted, type Entry } from '@/lib/records';
+import { WHO_COLOR, fdi, findingOf, sorted, type Entry } from '@/lib/records';
 import { addAppointmentToCalendar, appointmentGoogleUrl } from '@/lib/reminders';
 import { useStore } from '@/lib/store';
 import { radius, tint, tone, typo, useTheme } from '@/theme';
@@ -57,7 +57,7 @@ export function RecentUpdates({ index = 0 }: { index?: number }) {
                 </View>
                 <T style={[typo.caption, { color: c.textMuted }]} numberOfLines={1}>{toothName(jaw, kind, lang)} · {fmt(e.date, lang)}</T>
               </View>
-              <Icon size={16} color={e.by === 'dentist' ? tone(c, 'success').fg : c.onBrandSoft} accessibilityLabel={e.by === 'dentist' ? (bm ? 'Disahkan doktor gigi' : 'Dentist confirmed') : bm ? 'Pemerhatian ibu bapa' : 'Parent observation'} />
+              <Icon size={16} color={WHO_COLOR[e.by]} accessibilityLabel={e.by === 'dentist' ? (bm ? 'Disahkan doktor gigi' : 'Dentist confirmed') : bm ? 'Pemerhatian ibu bapa' : 'Parent observation'} />
             </View>
           );
         })
