@@ -79,3 +79,11 @@ or change it (see the rules). The temporary Masalah/Belajar editing tools are no
 - **Sign-in says "Ada masalah":** Email/Password isn't enabled (1.2) or the domain isn't authorised (3).
 - **Cloud shows a yellow dot / data doesn't save:** the Firestore rules weren't published (1.4) or the
   database wasn't created (1.3).
+- **404: NOT_FOUND on the site:** the build didn't produce `dist/` (open the Vercel build log), or the Output
+  Directory was overridden in Vercel → Settings → Build & Development. Clear the override (`vercel.json` sets it).
+- **Old version still showing on the phone:** close the app fully and open it again (maybe twice).
+
+### Re-creating the Vercel project from scratch
+
+vercel.com → **Add New → Project** → import **tumbuh** → Framework Preset **Other**, leave Build/Output/Install
+empty so `vercel.json` is used → add `FIREBASE_CONFIG` (step 2) → **Deploy**.
