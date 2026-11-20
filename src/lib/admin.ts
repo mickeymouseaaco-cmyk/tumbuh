@@ -12,7 +12,7 @@ import { Platform } from 'react-native';
 
 import type { Problem, Tag } from './content';
 
-export const ADMIN_EDITING = true;
+export const ADMIN_EDITING = false; // editing finished 20 Nov 2026; set to true to bring the tools back
 
 export type CustomProblem = Problem & { stack: string; photo?: string };
 /** hidden: built-in conditions taken off the list; noPhoto: built-in photos taken off; tags: changed levels */
