@@ -455,7 +455,7 @@ export const problems: Problem[] = [
     todo: { bm: 'Jumpa doktor atau perunding laktasi untuk pemeriksaan. Tidak semua perlu dirawat.', en: 'Ask a doctor or lactation consultant to check. Not every case needs treatment.' },
   },
   {
-    id: 'late', tag: 'ok', term: 'Delayed eruption',
+    id: 'late', tag: 'check', term: 'Delayed eruption',
     title: { bm: 'Gigi lambat tumbuh', en: 'Late teeth' },
     looks: { bm: 'Belum ada gigi walaupun umur sudah lebih 12 bulan.', en: 'No teeth yet even after 12 months.' },
     todo: { bm: 'Selalunya normal dan ikut keturunan. Jumpa doktor gigi jika tiada gigi langsung pada umur 18 bulan.', en: 'Usually normal and often runs in families. See a dentist if there are no teeth at all by 18 months.' },
@@ -473,13 +473,13 @@ export const problems: Problem[] = [
     todo: { bm: 'Tidak berbahaya dan hilang sendiri dalam beberapa minggu. Jangan picit.', en: "Harmless and fade on their own within weeks. Don't squeeze them." },
   },
   {
-    id: 'suck', tag: 'ok', term: 'Thumb / pacifier sucking',
+    id: 'suck', tag: 'check', term: 'Thumb / pacifier sucking',
     title: { bm: 'Hisap jari atau puting', en: 'Thumb or dummy sucking' },
     looks: { bm: 'Tabiat biasa untuk tenangkan diri.', en: 'A normal way for babies to soothe themselves.' },
     todo: { bm: 'Biasanya tidak apa sebelum umur 3–4 tahun. Galakkan berhenti perlahan-lahan dengan pujian, bukan marah.', en: 'Usually fine before age 3–4. Help them stop gently with praise, not scolding.' },
   },
   {
-    id: 'grind', tag: 'ok', term: 'Bruxism',
+    id: 'grind', tag: 'check', term: 'Bruxism',
     title: { bm: 'Kisar gigi', en: 'Teeth grinding' },
     looks: { bm: 'Bunyi gigi berkeriut, selalunya waktu tidur.', en: 'A grinding or squeaking sound, often during sleep.' },
     todo: { bm: 'Biasa berlaku dan selalunya hilang sendiri. Beritahu doktor gigi jika gigi nampak haus atau anak sakit.', en: 'Common and usually outgrown. Tell your dentist if teeth look worn or your child is in pain.' },
@@ -489,6 +489,33 @@ export const problems: Problem[] = [
     title: { bm: 'Celah antara gigi', en: 'Gaps between teeth' },
     looks: { bm: 'Ada ruang antara gigi susu.', en: 'Spaces between the baby teeth.' },
     todo: { bm: 'Normal dan sebenarnya bagus — ia beri ruang untuk gigi kekal yang lebih besar nanti.', en: 'Normal and actually good — it leaves room for the bigger adult teeth later.' },
+  },
+  {
+    id: 'abscess', tag: 'urgent', term: 'Dental abscess',
+    title: { bm: 'Nanah', en: 'Dental abscess' },
+    looks: { bm: 'Ianya seperti nanah yang mempunyai cecair yang berwarna kuning jika dipicit.', en: 'A small pocket of pus caused by bacteria infecting the tooth or gums.' },
+    todo: { bm: 'Perlu pergi ke Klinik Pergigian dengan kadar segera kerana ianya boleh menjadi lebih teruk jika dibiarkan walau sehari.', en: 'Please visit the nearest dental clinic for further assessment and treatment, as the condition may worsen over time.' },
+  },
+  {
+    id: 'mih', tag: 'check', term: 'Molar Incisor Hypomineralisation (MIH)',
+    title: { bm: 'Molar Incisor Hypomineralization (MIH)', en: 'Molar Incisor Hypomineralization (MIH)' },
+    looks: { bm: 'MIH ialah keadaan di mana enamel (lapisan luar gigi yang melindungi gigi) tidak terbentuk dengan sempurna.', en: 'MIH is a condition where the enamel (outer protective layer of the tooth) does not develop properly.' },
+    todo: { bm: 'Sila bawa anak anda ke klinik pergigian berhampiran untuk pemeriksaan. Rawatan awal dapat membantu melindungi enamel gigi yang lemah dan mengelakkan kerosakan menjadi lebih teruk.', en: 'Please bring your child to the nearest dental clinic for an assessment. Early treatment can help protect the weak enamel and prevent further damage.' },
+  },
+  {
+    id: 'mucocele', tag: 'check', term: 'Mucocele',
+    title: { bm: 'Mucocele', en: 'Mucocele' },
+    looks: { bm: 'Benjolan kecil yang berisi cecair air liur (saliva) yang terbentuk di dalam mulut.', en: 'A small, fluid-filled swelling or bubble that develops inside the mouth.' },
+    todo: { bm: 'Sila berjumpa dengan doktor gigi untuk pemeriksaan dan rawatan lanjut sekiranya benjolan ini tidak hilang atau semakin membesar.', en: 'Please visit your dentist for further assessment.' },
+  },
+  {
+    id: 'phgs', tag: 'check', term: 'Primary herpetic gingivostomatitis',
+    title: { bm: 'Primary Herpetic Gingivostomatitis', en: 'Primary Herpetic Gingivostomatitis' },
+    looks: { bm: 'PHGS ialah jangkitan virus di dalam mulut yang disebabkan oleh Herpes Simplex Virus (HSV), biasanya HSV-1.', en: 'PHGS is a viral infection in the mouth caused by the Herpes Simplex Virus (HSV), usually HSV-1.' },
+    todo: {
+      bm: '1) Minum banyak air – elak kekurangan air badan.\n2) Ubat tahan sakit – paracetamol atau ibuprofen (ikut umur dan berat badan anak).\n3) Makan makanan lembut – bubur, yogurt dan kentang lecek.\n4) Elak makanan pedas, masam dan panas – boleh memedihkan ulser.\n5) Jaga kebersihan mulut – bersihkan mulut dengan perlahan.\n6) Sapu jeli petroleum – jika ada luka di bibir.\n7) Jumpa doktor gigi atau doktor – untuk pemeriksaan, terutamanya jika anak susah makan atau minum.',
+      en: "1) Drink plenty of water – prevent dehydration.\n2) Take painkillers – paracetamol or ibuprofen (according to the child's age and weight).\n3) Eat soft foods – porridge, yoghurt and mashed potatoes.\n4) Avoid spicy, sour and hot foods – they can irritate the ulcers.\n5) Maintain oral hygiene – clean the mouth gently.\n6) Apply petroleum jelly – if there are sores on the lips.\n7) Visit a dentist or doctor – for assessment, especially if the child has difficulty eating or drinking.",
+    },
   },
 ];
 
@@ -540,8 +567,8 @@ export const learnCards: Record<string, LearnCard[]> = {
 /* ---------- Masalah as Smart Stacks (two per row) ---------- */
 
 export const problemStacks: { id: string; bm: string; en: string; items: string[] }[] = [
-  { id: 'teeth', bm: 'Gigi', en: 'Teeth', items: ['ecc', 'colour', 'late', 'gaps'] },
-  { id: 'newborn', bm: 'Bayi baru lahir', en: 'Newborn', items: ['natal', 'pearls', 'tie'] },
-  { id: 'mouth', bm: 'Gusi & mulut', en: 'Gums & mouth', items: ['thrush', 'cyst'] },
+  { id: 'teeth', bm: 'Gigi', en: 'Teeth', items: ['ecc', 'colour', 'late', 'gaps', 'abscess', 'mih'] },
+  { id: 'newborn', bm: 'Bayi baru lahir', en: 'Newborn', items: ['natal', 'tie'] },
+  { id: 'mouth', bm: 'Gusi & mulut', en: 'Gums & mouth', items: ['thrush', 'mucocele', 'phgs'] },
   { id: 'habits', bm: 'Jatuh & tabiat', en: 'Falls & habits', items: ['injury', 'suck', 'grind'] },
 ];

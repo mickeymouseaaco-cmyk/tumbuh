@@ -18,7 +18,8 @@ export type CustomProblem = Problem & { stack: string; photo?: string };
 /** hidden: built-in conditions taken off the list; noPhoto: built-in photos taken off; tags: changed levels */
 type AdminData = { custom: CustomProblem[]; photos: Record<string, string>; hidden: string[]; noPhoto: string[]; tags: Record<string, Tag> };
 
-const KEY = 'tumbuh:admin:v1';
+// v1 (exported 20 Nov 2026) is built into the app; a fresh store stops those edits showing twice
+const KEY = 'tumbuh:admin:v2';
 let data: AdminData = { custom: [], photos: {}, hidden: [], noPhoto: [], tags: {} };
 let loaded = false;
 const listeners = new Set<(d: AdminData) => void>();

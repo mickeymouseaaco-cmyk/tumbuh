@@ -18,6 +18,8 @@ const boy: Record<string, number> = {
   lap: require('../../public/learn-art/boy/lap.webp'),
   newbrush: require('../../public/learn-art/boy/newbrush.webp'),
   parent: require('../../public/learn-art/boy/parent.webp'),
+  paste: require('../../public/learn-art/boy/paste.webp'),
+  ppm: require('../../public/learn-art/boy/ppm.webp'),
 };
 
 // No girl pictures yet: a girl keeps the animated Yuki scenes so the child always matches.
