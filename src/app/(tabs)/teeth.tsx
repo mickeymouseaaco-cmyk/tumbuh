@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { EruptionChart } from '@/components/eruption-chart';
+import { KidSwitcher } from '@/components/kid-switcher';
 import { MouthExplorer } from '@/components/mouth';
 import { Card, H2, ProgressBar, Screen, T, enter } from '@/components/ui';
 import { fill } from '@/lib/content';
@@ -52,7 +53,7 @@ export default function Teeth() {
   const { c } = useTheme();
   const { t, name } = useStore();
   return (
-    <Screen title={t.teethTitle} subtitle={t.teethSub}>
+    <Screen title={t.teethTitle} subtitle={t.teethSub} top={<KidSwitcher />}>
       <TeethSummary />
       <Animated.View entering={enter(2)} accessibilityLabel={fill(t.mouthTitle, { name })}>
         <MouthExplorer />

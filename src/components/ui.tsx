@@ -241,7 +241,8 @@ export function LangSwitch() {
 }
 
 /** A tab page: brand row with the BM/EN switch, big title, scrolling content that clears the floating tab bar. */
-export function Screen({ title, subtitle, eyebrow, children }: { title: string; subtitle?: string; eyebrow?: string; children: ReactNode }) {
+/** `top`: something shown above the title (e.g. the child switcher). */
+export function Screen({ title, subtitle, eyebrow, top, children }: { title: string; subtitle?: string; eyebrow?: string; top?: ReactNode; children: ReactNode }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   return (
@@ -259,7 +260,8 @@ export function Screen({ title, subtitle, eyebrow, children }: { title: string; 
           </View>
           <LangSwitch />
         </View>
-        <Animated.View entering={enter(0)} style={{ gap: 6, marginTop: 12, marginBottom: 4 }}>
+        {top}
+        <Animated.View entering={enter(0)} style={{ gap: 6, marginTop: top ? 0 : 12, marginBottom: 4 }}>
           <Display>{title}</Display>
           {subtitle || eyebrow ? (
             <T style={[typo.body, { color: c.textMuted }]}>{eyebrow ? `${eyebrow}. ` : ''}{subtitle}</T>

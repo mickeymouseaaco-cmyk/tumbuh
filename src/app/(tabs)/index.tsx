@@ -19,8 +19,11 @@ import Animated, {
 import { FluorideCard, fluorideIsDue } from '@/components/fluoride-card';
 import { TeethHalo, haloFigure } from '@/components/mascot';
 import { MouthZoom, type HeadRect } from '@/components/mouth-zoom';
+import { BrushReminder } from '@/components/brush-reminder';
 import { Cartoon } from '@/components/cartoon';
+import { KidSwitcher } from '@/components/kid-switcher';
 import { Card, Eyebrow, H2, PressableScale, ProgressBar, Screen, T, ToothIcon, enter } from '@/components/ui';
+import { dueBrushing } from '@/lib/reminders';
 import { checklist, fill, learn, learnCards, tipFor, topicMeta, topicsForAge } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
@@ -102,7 +105,7 @@ function QuickTile({ icon, title, sub, value, color, onPress, index }: { icon: R
 
 export default function Home() {
   const { c } = useTheme();
-  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender, fluoride, learned } = useStore();
+  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender, fluoride, learned, brush } = useStore();
   const count = Object.keys(erupted).length;
   const { due, next } = dueAndNext(age, erupted, lang);
   const items = checklist(lang, count > 0 || age >= 6);
@@ -124,6 +127,14 @@ export default function Home() {
   const lessonCards = learnCards[lessonId];
   const lessonGot = lessonCards.filter((k) => learned[`${lessonId}:${k.v}`]).length;
 
+  // brushing nudge: re-check the clock every minute
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((x) => x + 1), 60000);
+    return () => clearInterval(id);
+  }, []);
+  const brushNow = dueBrushing(brush, todayChecks);
+
   // the mascot smiles when today's routine is done
   const mood = allDone ? 'smile' : 'wave';
   const haloRef = useRef<View>(null);
@@ -143,7 +154,7 @@ export default function Home() {
   };
 
   return (
-    <Screen title={fill(t.teethOf, { name })} eyebrow={greeting(t)} subtitle={t.helloSub}>
+    <Screen title={fill(t.teethOf, { name })} eyebrow={greeting(t)} subtitle={t.helloSub} top={<KidSwitcher />}>
       {/* Hero: the mascot is the focal point; tap to fly into the mouth */}
       <Card index={1} style={{ alignItems: 'center', gap: 14, paddingTop: 18, overflow: 'hidden' }}>
         <Pressable accessibilityRole="button" accessibilityLabel={fill(t.tapHead, { name })} onPress={openMouth} style={{ alignItems: 'center' }}>
@@ -259,6 +270,17 @@ export default function Home() {
 
       {/* Routine */}
       <Card index={5} style={{ gap: 12 }}>
+        {brushNow ? (
+          <Animated.View entering={FadeIn.duration(motion.base)} layout={LinearTransition.duration(motion.base)}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radius.tile, backgroundColor: c.accentSoft, borderWidth: 1, borderColor: c.accentBorder }}>
+            <PulseDot />
+            <T style={[typo.label, { flex: 1, color: c.accentText }]}>
+              {lang === 'bm'
+                ? `Dah masa berus gigi ${brushNow === 'morning' ? 'pagi' : 'sebelum tidur'} ${name}! Tandakan bila siap.`
+                : `Time for ${name}'s ${brushNow === 'morning' ? 'morning' : 'bedtime'} brush! Tick it when done.`}
+            </T>
+          </Animated.View>
+        ) : null}
         <View style={{ gap: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <H2>{t.todayTitle}</H2>
@@ -289,6 +311,8 @@ export default function Home() {
           </Animated.View>
         ) : null}
       </Card>
+
+      <BrushReminder index={6} />
 
       {!fluorideTop ? <FluorideCard index={6} /> : null}
 
