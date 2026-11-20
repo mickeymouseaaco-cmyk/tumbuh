@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { localChanged, startCloud } from './cloud';
+import type { Entry } from './records';
 
 import { strings, type Lang, type Strings } from './content';
 
@@ -15,6 +16,8 @@ export type Kid = {
   checks: Record<string, Record<string, boolean>>; // 'YYYY-MM-DD' → item key → done
   fluoride: string[]; // 'YYYY-MM-DD' of each fluoride varnish at the clinic, oldest first
   photo?: string; // the parent's own photo of this child (small JPEG data URL), shown instead of the mascot
+  records?: Record<string, Entry[]>; // tooth id → parent observations and dentist findings
+  nextVisit?: string; // 'YYYY-MM-DD' of the next dentist appointment
 };
 
 /** Brushing reminder times, 'HH:MM' (24 h), shared by all the children. */
@@ -66,6 +69,11 @@ type Ctx = Omit<Saved, 'kids'> & Omit<Kid, 'id'> & {
   editKid: (id: string, p: Partial<Pick<Kid, 'babyName' | 'gender' | 'age' | 'photo'>>) => void;
   /** The active child's own photo (data URL), or null to go back to the mascot. */
   setPhoto: (uri: string | null) => void;
+  records: Record<string, Entry[]>;
+  addEntry: (tooth: string, e: Entry) => void;
+  removeEntry: (tooth: string, id: string) => void;
+  nextVisit?: string;
+  setNextVisit: (date: string | null) => void;
   /** Remove a child (the last one can't be removed). */
   removeKid: (id: string) => void;
   /** A child's display name. */
@@ -172,6 +180,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setName: (n) => updateKid((k) => ({ ...k, babyName: n.slice(0, 24) })),
       setGender: (g) => updateKid((k) => ({ ...k, gender: g })),
       photo: kid.photo,
+      records: kid.records ?? {},
+      nextVisit: kid.nextVisit,
+      addEntry: (tooth, e) => updateKid((k) => ({ ...k, records: { ...(k.records ?? {}), [tooth]: [...((k.records ?? {})[tooth] ?? []), e] } })),
+      removeEntry: (tooth, id) =>
+        updateKid((k) => {
+          const records = { ...(k.records ?? {}) };
+          const list = (records[tooth] ?? []).filter((x) => x.id !== id);
+          if (list.length) records[tooth] = list;
+          else delete records[tooth];
+          return { ...k, records };
+        }),
+      setNextVisit: (date) => updateKid((k) => { const n = { ...k }; if (date) n.nextVisit = date; else delete n.nextVisit; return n; }),
       setPhoto: (uri) => updateKid((k) => { const n = { ...k }; if (uri) n.photo = uri; else delete n.photo; return n; }),
       setAge: (a) => updateKid((k) => ({ ...k, age: Math.max(0, Math.min(36, a)) })),
       addAge: (n) => updateKid((k) => ({ ...k, age: Math.max(0, Math.min(36, k.age + n)) })),

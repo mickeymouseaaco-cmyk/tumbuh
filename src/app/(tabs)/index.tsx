@@ -20,12 +20,14 @@ import { FluorideCard, fluorideIsDue } from '@/components/fluoride-card';
 import { TeethHalo, haloFigure } from '@/components/mascot';
 import { MouthZoom, type HeadRect } from '@/components/mouth-zoom';
 import { BrushReminder } from '@/components/brush-reminder';
+import { AppointmentCard, RecentUpdates, useAllRecords } from '@/components/dental-summary';
 import { Cartoon } from '@/components/cartoon';
 import { KidSwitcher } from '@/components/kid-switcher';
 import { Card, Eyebrow, H2, PressableScale, ProgressBar, Screen, T, ToothIcon, enter } from '@/components/ui';
 import { dueBrushing } from '@/lib/reminders';
 import { checklist, fill, learn, learnCards, tipFor, topicMeta, topicsForAge } from '@/lib/content';
 import { pickPhoto } from '@/lib/admin';
+import { fmt } from '@/lib/fluoride';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
 import { dueAndNext, range } from '@/lib/teeth';
@@ -106,7 +108,8 @@ function QuickTile({ icon, title, sub, value, color, onPress, index }: { icon: R
 
 export default function Home() {
   const { c } = useTheme();
-  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender, fluoride, learned, brush, photo, setPhoto } = useStore();
+  const { t, lang, name, age, addAge, erupted, todayChecks, toggleCheck, gender, setGender, fluoride, learned, brush, photo, setPhoto, records } = useStore();
+  const latest = useAllRecords()[0];
   const count = Object.keys(erupted).length;
   const { due, next } = dueAndNext(age, erupted, lang);
   const items = checklist(lang, count > 0 || age >= 6);
@@ -230,6 +233,18 @@ export default function Home() {
           <ProgressBar value={count / 20} color={count === 20 ? ok.fg : c.accent} delay={250} />
         </View>
 
+        {/* teeth assessed, and the latest update */}
+        <View style={{ alignSelf: 'stretch', flexDirection: 'row', gap: 8 }}>
+          <View style={{ flex: 1, gap: 2, padding: 12, borderRadius: radius.tile, backgroundColor: c.surfaceAlt }}>
+            <T style={[typo.caption, { color: c.textMuted }]}>{lang === 'bm' ? 'Gigi dirakod' : 'Teeth recorded'}</T>
+            <T style={[typo.heading, { fontVariant: ['tabular-nums'] }]}>{Object.keys(records).length}<T style={[typo.caption, { color: c.textMuted }]}> / 20</T></T>
+          </View>
+          <View style={{ flex: 1.4, gap: 2, padding: 12, borderRadius: radius.tile, backgroundColor: c.surfaceAlt }}>
+            <T style={[typo.caption, { color: c.textMuted }]}>{lang === 'bm' ? 'Kemas kini terakhir' : 'Last update'}</T>
+            <T style={typo.label} numberOfLines={1}>{latest ? fmt(latest.date, lang) : lang === 'bm' ? 'Belum ada' : 'None yet'}</T>
+          </View>
+        </View>
+
         {/* age */}
         <View style={{ alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 8, paddingLeft: 18, borderRadius: radius.pill, backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border }}>
           <View>
@@ -343,6 +358,8 @@ export default function Home() {
         ) : null}
       </Card>
 
+      <RecentUpdates index={6} />
+
       <BrushReminder index={6} />
 
       {!fluorideTop ? <FluorideCard index={6} /> : null}
@@ -376,16 +393,7 @@ export default function Home() {
         </PressableScale>
       </Animated.View>
 
-      {/* Dentist */}
-      <Animated.View entering={enter(8)} style={{ flexDirection: 'row', gap: 14, padding: 18, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: lilac.bg, borderWidth: 1, borderColor: c.border }}>
-        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' }}>
-          <CalendarHeart size={22} color={lilac.fg} strokeWidth={2} />
-        </View>
-        <View style={{ flex: 1, gap: 4 }}>
-          <T style={[typo.heading, { color: lilac.fg }]}>{t.visitTitle}</T>
-          <T style={[typo.bodySm, { color: c.text }]}>{t.visitBody}</T>
-        </View>
-      </Animated.View>
+      <AppointmentCard index={8} />
     </Screen>
   );
 }

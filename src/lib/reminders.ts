@@ -117,3 +117,58 @@ export function dueBrushing(times: BrushTimes, done: Record<string, boolean>, no
   if (!done.b && m >= nig) return 'night';
   return null;
 }
+
+/* ---------- dentist appointment ---------- */
+
+function apptText(lang: Lang, name: string) {
+  return lang === 'bm'
+    ? { title: `🦷 Temu janji doktor gigi ${name}`, body: 'Bawa buku rekod kesihatan anak. Tunjukkan rekod gigi dalam Tumbuh kepada doktor gigi.' }
+    : { title: `🦷 ${name}'s dentist appointment`, body: "Bring the child's health book. Show the tooth records in Tumbuh to the dentist." };
+}
+const ymd = (k: string) => k.replace(/-/g, '');
+const nextDayKey = (k: string) => {
+  const [y, m, d] = k.split('-').map(Number);
+  const t = new Date(y, m - 1, d + 1);
+  return `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}`;
+};
+
+/** All-day event on the appointment day, with an alert at 9 am the day before and 8 am on the day. */
+export function addAppointmentToCalendar(date: string, lang: Lang, name: string) {
+  const doc = (globalThis as any).document;
+  if (Platform.OS !== 'web' || !doc) return;
+  const { title, body } = apptText(lang, name);
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const lines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Tumbuh//Dentist//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VEVENT', `UID:tumbuh-dentist-${ymd(date)}@tumbuh.app`, `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${ymd(date)}`, `DTEND;VALUE=DATE:${nextDayKey(date)}`,
+    `SUMMARY:${ics(title)}`, `DESCRIPTION:${ics(body)}`,
+    'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${ics(title)}`, 'TRIGGER:-PT15H', 'END:VALARM',
+    'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${ics(title)}`, 'TRIGGER:PT8H', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR',
+  ];
+  const text = lines.join('\r\n');
+  const nav = (globalThis as any).navigator;
+  const ua = nav?.userAgent ?? '';
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && nav?.maxTouchPoints > 1)) {
+    (globalThis as any).location.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(text)}`;
+    return;
+  }
+  const blob = new (globalThis as any).Blob([text], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = doc.createElement('a');
+  a.href = url;
+  a.download = 'tumbuh-doktor-gigi.ics';
+  doc.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    a.remove();
+  }, 4000);
+}
+
+export function appointmentGoogleUrl(date: string, lang: Lang, name: string) {
+  const { title, body } = apptText(lang, name);
+  const q = new URLSearchParams({ action: 'TEMPLATE', text: title, details: body, dates: `${ymd(date)}/${nextDayKey(date)}` });
+  return `https://calendar.google.com/calendar/render?${q.toString()}`;
+}

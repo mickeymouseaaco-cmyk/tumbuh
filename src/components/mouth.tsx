@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, {
   FadeIn,
@@ -13,7 +13,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
 
-import { Button, Eyebrow, PressableScale, T } from '@/components/ui';
+import { ToothSheet } from '@/components/tooth-sheet';
+import { Eyebrow, PressableScale, T } from '@/components/ui';
 import { strings, toothAges, toothId, toothName, type Jaw, type Kind, type Side } from '@/lib/content';
 import { haptic } from '@/lib/haptics';
 import {
@@ -32,16 +33,17 @@ import {
   tongueGroove,
   tonguePath,
 } from '@/lib/mouth-geometry';
+import { fdi, markerTone } from '@/lib/records';
 import { useStore } from '@/lib/store';
 import { ARCH, range, statusOf, type Status } from '@/lib/teeth';
-import { fonts, motion, radius, useTheme } from '@/theme';
+import { fonts, motion, tone, useTheme } from '@/theme';
 
 const GAP = 22;
 export const mouthHeight = (s: number) => (AH * 2 + GAP) * s;
 
 /* ---------- One tooth ---------- */
 
-function Crown({ kind, status, s }: { kind: Kind; status: Status; s: number }) {
+export function Crown({ kind, status, s }: { kind: Kind; status: Status; s: number }) {
   const { c } = useTheme();
   const box = boxFor(kind);
   const { w, d } = CROWN[kind];
@@ -87,7 +89,7 @@ function Crown({ kind, status, s }: { kind: Kind; status: Status; s: number }) {
 
 function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Jaw; kind: Kind; side: Side; index: number; s: number; selected: boolean; onSelect: (id: string) => void }) {
   const { c } = useTheme();
-  const { lang, age, erupted } = useStore();
+  const { lang, age, erupted, records } = useStore();
   const reduce = useReducedMotion();
   const id = toothId(jaw, kind, side);
   const status = statusOf(jaw, kind, side, age, erupted);
@@ -117,6 +119,9 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
   }, [status, reduce, grow, halo, last]);
 
   const crownStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${rot}deg` }, { scale: grow.value }] }));
+  // a small dot shows this tooth has records: violet = parent's observation, colour = dentist's finding
+  const mark = markerTone(records[id]);
+  const markColor = !mark ? null : mark.by === 'parent' ? c.onBrandSoft : tone(c, mark.tone).fg;
   const haloStyle = useAnimatedStyle(() => ({ opacity: halo.value }));
   const size = box * s;
 
@@ -124,7 +129,7 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
     <PressableScale
       scaleTo={0.9}
       accessibilityRole="button"
-      accessibilityLabel={`${toothName(jaw, kind, lang)} (${strings[lang].side[side]})`}
+      accessibilityLabel={`${toothName(jaw, kind, lang)} (${strings[lang].side[side]}), FDI ${fdi(jaw, kind, side)}`}
       accessibilityState={{ selected }}
       onPress={() => {
         haptic.tap();
@@ -138,14 +143,18 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
         ]}
       />
       {selected ? (
+        // gentle glow around the chosen tooth
         <Animated.View
           entering={FadeIn.duration(160)}
-          style={{ position: 'absolute', width: size * 0.98, height: size * 0.98, borderRadius: size, borderWidth: 2, borderColor: c.white }}
+          style={{ position: 'absolute', width: size * 1.02, height: size * 1.02, borderRadius: size, borderWidth: 2, borderColor: c.white, boxShadow: `0 0 ${14 * s}px rgba(255,255,255,0.55)` }}
         />
       ) : null}
       <Animated.View style={[{ width: size, height: size }, crownStyle]}>
         <Crown kind={kind} status={status} s={s} />
       </Animated.View>
+      {markColor ? (
+        <View style={{ position: 'absolute', top: jaw === 'U' ? undefined : 0, bottom: jaw === 'U' ? 0 : undefined, right: 0, width: 12 * Math.max(s, 0.9), height: 12 * Math.max(s, 0.9), borderRadius: 7, backgroundColor: markColor, borderWidth: 2, borderColor: c.gumDeep }} />
+      ) : null}
     </PressableScale>
   );
 }
@@ -225,63 +234,44 @@ export function MouthView({ s, selected, onSelect }: { s: number; selected: stri
 
 export function MouthExplorer({ maxWidth }: { maxWidth?: number }) {
   const { c } = useTheme();
-  const { t, lang, age, erupted, toggleTooth } = useStore();
+  const { t, lang, records } = useStore();
   const { width } = useWindowDimensions();
-  const [sel, setSel] = useState('U-c-R');
+  const [sel, setSel] = useState<string | null>(null);
   const avail = Math.min(maxWidth ?? width, 560) - 40;
   const s = Math.max(0.8, Math.min(1.25, avail / MW));
-
-  const [sj, sk, ss] = sel.split('-') as [Jaw, Kind, Side];
-  const status = statusOf(sj, sk, ss, age, erupted);
-  const isIn = !!erupted[sel];
-  const tag =
-    status === 'in'
-      ? { bg: c.mint, fg: c.onMint, label: t.legIn }
-      : status === 'due'
-        ? { bg: c.accentSoft, fg: c.accentText, label: t.legDue }
-        : { bg: c.surfaceAlt, fg: c.textMuted, label: t.legNot };
+  const recorded = Object.keys(records).length;
+  const legendItem = (key: string, swatch: ReactNode, label: string) => (
+    <View key={key} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      {swatch}
+      <T style={{ fontFamily: fonts.medium, fontSize: 13, color: c.textMuted }}>{label}</T>
+    </View>
+  );
+  const dot = (color: string) => <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: color, borderWidth: 2, borderColor: c.gumDeep }} />;
 
   return (
     <View style={{ gap: 16, alignItems: 'center' }}>
+      <T style={{ fontFamily: fonts.medium, fontSize: 14, color: c.textMuted, textAlign: 'center' }}>
+        {lang === 'bm' ? 'Tekan mana-mana gigi untuk butiran dan rekod.' : 'Tap any tooth for details and records.'}
+      </T>
       <Eyebrow color={c.textMuted}>{t.upper}</Eyebrow>
-      <MouthView s={s} selected={sel} onSelect={setSel} />
+      <MouthView s={s} selected={sel ?? ''} onSelect={setSel} />
       <Eyebrow color={c.textMuted}>{t.lower}</Eyebrow>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 16 }}>
-        {(['in', 'due', 'not'] as Status[]).map((st) => (
-          <View key={st} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', columnGap: 16, rowGap: 10 }}>
+        {(['in', 'due', 'not'] as Status[]).map((st) =>
+          legendItem(
+            st,
             <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center', borderWidth: st === 'due' ? 2 : 0, borderColor: c.accent }}>
               <Crown kind="c" status={st} s={0.5} />
-            </View>
-            <T style={{ fontFamily: fonts.medium, fontSize: 13, color: c.textMuted }}>{st === 'in' ? t.legIn : st === 'due' ? t.legDue : t.legNot}</T>
-          </View>
-        ))}
+            </View>,
+            st === 'in' ? t.legIn : st === 'due' ? t.legDue : t.legNot,
+          ),
+        )}
+        {recorded ? legendItem('p', dot(c.onBrandSoft), lang === 'bm' ? 'Pemerhatian ibu bapa' : 'Parent observation') : null}
+        {recorded ? legendItem('d', dot(tone(c, 'success').fg), lang === 'bm' ? 'Disahkan doktor gigi' : 'Dentist confirmed') : null}
       </View>
 
-      <View style={{ alignSelf: 'stretch', gap: 14, padding: 18, borderRadius: radius.card, borderCurve: 'continuous', backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
-        <Animated.View key={sel + lang} entering={FadeIn.duration(motion.base)} style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-          <View style={{ width: 58, height: 58, borderRadius: 20, borderCurve: 'continuous', backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-            <Crown kind={sk} status={status} s={58 / boxFor(sk)} />
-          </View>
-          <View style={{ flex: 1, gap: 3 }}>
-            <T style={{ fontFamily: fonts.display, fontSize: 19, lineHeight: 24 }}>{toothName(sj, sk, lang)}</T>
-            <T style={{ fontSize: 14, color: c.textMuted }}>
-              {t.usually} {range(toothAges[sj][sk], t.unit)}
-            </T>
-          </View>
-          <View style={{ paddingVertical: 6, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: tag.bg }}>
-            <T style={{ fontSize: 12, fontFamily: fonts.bold, color: tag.fg }}>{tag.label}</T>
-          </View>
-        </Animated.View>
-        <Button
-          kind={isIn ? 'soft' : 'primary'}
-          label={isIn ? t.markOut : t.markIn}
-          onPress={() => {
-            isIn ? haptic.soft() : haptic.success();
-            toggleTooth(sel);
-          }}
-        />
-      </View>
+      <ToothSheet tooth={sel} onClose={() => setSel(null)} />
     </View>
   );
 }

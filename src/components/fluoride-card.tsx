@@ -9,7 +9,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition, useAnimatedStyle, useShare
 
 import { PressableScale, T, enter } from '@/components/ui';
 import type { Lang } from '@/lib/content';
-import { addMonths, addToCalendar, daysUntil, fluorideStatus, fmt, googleCalendarUrl, monthName, toKey } from '@/lib/fluoride';
+import { addMonths, addToCalendar, daysUntil, fluorideStatus, fmt, fromKey, googleCalendarUrl, monthName, toKey } from '@/lib/fluoride';
 import { haptic } from '@/lib/haptics';
 import { useStore } from '@/lib/store';
 import { fonts, motion, radius, tint, useTheme } from '@/theme';
@@ -87,14 +87,17 @@ function Stepper({ label, value, onStep }: { label: string; value: string; onSte
   );
 }
 
-function DatePicker({ lang, onSave }: { lang: Lang; onSave: (k: string) => void }) {
+/** Day / month / year steppers. Past dates by default; `future` allows today to two years ahead instead. */
+export function DatePicker({ lang, onSave, future = false, start, saveLabel }: { lang: Lang; onSave: (k: string) => void; future?: boolean; start?: string; saveLabel?: string }) {
   const { c } = useTheme();
   const s = L[lang];
-  const [d, setD] = useState(() => new Date());
+  const [d, setD] = useState(() => (start ? fromKey(start) : new Date()));
   const clamp = (x: Date) => {
     const now = new Date();
-    const min = new Date(now.getFullYear() - 6, 0, 1);
-    return x > now ? now : x < min ? min : x;
+    now.setHours(0, 0, 0, 0);
+    const min = future ? now : new Date(now.getFullYear() - 6, 0, 1);
+    const max = future ? new Date(now.getFullYear() + 2, 11, 31) : now;
+    return x > max ? max : x < min ? min : x;
   };
   const move = (part: 'd' | 'm' | 'y', n: number) => {
     haptic.tap();
@@ -122,7 +125,7 @@ function DatePicker({ lang, onSave }: { lang: Lang; onSave: (k: string) => void 
       <PressableScale accessibilityRole="button" onPress={() => onSave(toKey(d))}
         style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 46, borderRadius: radius.pill, backgroundColor: c.accent }}>
         <Check size={17} color={c.onAccent} strokeWidth={2.6} />
-        <T style={{ fontFamily: fonts.semi, color: c.onAccent }}>{s.save} · {fmt(toKey(d), lang)}</T>
+        <T style={{ fontFamily: fonts.semi, color: c.onAccent }}>{saveLabel ?? s.save} · {fmt(toKey(d), lang)}</T>
       </PressableScale>
     </Animated.View>
   );
