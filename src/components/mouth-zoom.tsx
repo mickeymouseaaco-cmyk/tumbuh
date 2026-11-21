@@ -1,5 +1,5 @@
 import { X } from 'lucide-react-native';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useId } from 'react';
 import { Modal, ScrollView, View, useWindowDimensions } from 'react-native';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,7 @@ export type HeadRect = { x: number; y: number; width: number; height: number; mo
  * Closing plays it backwards. With Reduce Motion it's a simple cross-fade.
  */
 export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClose: () => void }) {
+  const u = useId().replace(/[^a-zA-Z0-9_-]/g, ''); // unique gradient ids (iPhone Safari)
   const { c } = useTheme();
   const { t, name } = useStore();
   const { width: W, height: H } = useWindowDimensions();
@@ -87,13 +88,13 @@ export function MouthZoom({ origin, onClose }: { origin: HeadRect | null; onClos
         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, cavityStyle]}>
           <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
             <Defs>
-              <RadialGradient id="cavity" cx="50" cy="45" r="75" gradientUnits="userSpaceOnUse">
+              <RadialGradient id={`cavity-${u}`} cx="50" cy="45" r="75" gradientUnits="userSpaceOnUse">
                 <Stop offset="0" stopColor="#5A1428" />
                 <Stop offset="0.55" stopColor={c.cavity} />
                 <Stop offset="1" stopColor="#0B0410" />
               </RadialGradient>
             </Defs>
-            <Rect x="0" y="0" width="100" height="100" fill="url(#cavity)" />
+            <Rect x="0" y="0" width="100" height="100" fill={`url(#cavity-${u})`} />
           </Svg>
         </Animated.View>
 

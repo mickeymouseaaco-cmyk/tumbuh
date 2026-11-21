@@ -1,5 +1,5 @@
 import { Camera, CircleCheck, Plus, Siren, Stethoscope } from 'lucide-react-native';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useId } from 'react';
 import { Image, PanResponder, Platform, Pressable, View } from 'react-native';
 import Animated, {
   FadeIn,
@@ -60,6 +60,7 @@ export function SmartStack({
   onAdd?: () => void;
   autoDelay?: number;
 }) {
+  const u = useId().replace(/[^a-zA-Z0-9_-]/g, ''); // unique gradient ids (iPhone Safari)
   const { c } = useTheme();
   const { t, lang } = useStore();
   const reduce = useReducedMotion();
@@ -179,12 +180,12 @@ export function SmartStack({
               {/* legibility fade at the bottom */}
               <Svg width="100%" height={110} style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }} preserveAspectRatio="none" viewBox="0 0 10 10">
                 <Defs>
-                  <LinearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+                  <LinearGradient id={`fade-${u}`} x1="0" y1="0" x2="0" y2="1">
                     <Stop offset="0" stopColor="#0B0A1A" stopOpacity="0" />
                     <Stop offset="1" stopColor="#0B0A1A" stopOpacity="0.92" />
                   </LinearGradient>
                 </Defs>
-                <Rect x="0" y="0" width="10" height="10" fill="url(#fade)" />
+                <Rect x="0" y="0" width="10" height="10" fill={`url(#fade-${u})`} />
               </Svg>
               <View style={{ position: 'absolute', left: 12, right: 22, bottom: 12, gap: 6 }}>
                 <View style={{ flexDirection: 'row', alignSelf: 'flex-start', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill, backgroundColor: tt.fg }}>

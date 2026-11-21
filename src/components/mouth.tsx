@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, {
   FadeIn,
@@ -44,6 +44,14 @@ export const mouthHeight = (s: number) => (AH * 2 + GAP) * s;
 /* ---------- One tooth ---------- */
 
 /**
+ * A unique id per drawing. iPhone Safari can't reliably resolve url(#…) when several SVGs on the page
+ * use the same gradient id (a tooth then drew hollow, without its enamel), so every drawing gets its own.
+ */
+function useUid() {
+  return useId().replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
+/**
  * One crown, drawn as it looks. `look` (from the newest record) draws what was seen on the tooth:
  * a white/yellow spot, a brown spot, a hole (decay, dentist only), a chipped corner, a swollen gum bump,
  * a filling, or an empty socket. Healthy teeth stay plain.
@@ -53,7 +61,8 @@ export function Crown({ kind, status, s, look = 'none' }: { kind: Kind; status: 
   const box = boxFor(kind);
   const { w, d } = CROWN[kind];
   const vb = `${-box / 2} ${-box / 2} ${box} ${box}`;
-  const id = `e-${kind}`;
+  const u = useUid();
+  const id = `e-${kind}-${u}`;
   const molar = kind === 'm1' || kind === 'm2';
   // a tooth that was taken out: just the healed socket in the gum
   if (look === 'missing') {
@@ -71,11 +80,11 @@ export function Crown({ kind, status, s, look = 'none' }: { kind: Kind; status: 
           <Stop offset="0" stopColor={c.enamel} />
           <Stop offset="1" stopColor={c.enamel2} />
         </RadialGradient>
-        <RadialGradient id={`sw-${kind}`} cx="40%" cy="35%" r="80%">
+        <RadialGradient id={`sw-${kind}-${u}`} cx="40%" cy="35%" r="80%">
           <Stop offset="0" stopColor="#FFD3DD" />
           <Stop offset="1" stopColor={c.swollen} />
         </RadialGradient>
-        <ClipPath id={`cl-${kind}`}>
+        <ClipPath id={`cl-${kind}-${u}`}>
           <Path d={crownPath(kind)} transform="scale(1.06)" />
         </ClipPath>
       </Defs>
@@ -113,7 +122,7 @@ export function Crown({ kind, status, s, look = 'none' }: { kind: Kind; status: 
           ) : look === 'chip' ? (
             // a corner broken off, with a jagged edge
             <G>
-              <Path clipPath={`url(#cl-${kind})`} d={`M ${w * 0.12} ${-d * 0.62} L ${w * 0.62} ${-d * 0.62} L ${w * 0.62} ${-d * 0.02} L ${w * 0.4} ${-d * 0.16} L ${w * 0.36} ${-d * 0.34} L ${w * 0.18} ${-d * 0.38} Z`} fill={c.gum} />
+              <Path clipPath={`url(#cl-${kind}-${u})`} d={`M ${w * 0.12} ${-d * 0.62} L ${w * 0.62} ${-d * 0.62} L ${w * 0.62} ${-d * 0.02} L ${w * 0.4} ${-d * 0.16} L ${w * 0.36} ${-d * 0.34} L ${w * 0.18} ${-d * 0.38} Z`} fill={c.gum} />
               <Path d={`M ${w * 0.5} ${-d * 0.07} L ${w * 0.4} ${-d * 0.16} L ${w * 0.36} ${-d * 0.34} L ${w * 0.18} ${-d * 0.38} L ${w * 0.14} ${-d * 0.5}`} fill="none" stroke={c.enamelEdge} strokeWidth={0.9} strokeLinejoin="round" />
             </G>
           ) : look === 'filled' ? (
@@ -130,7 +139,7 @@ export function Crown({ kind, status, s, look = 'none' }: { kind: Kind; status: 
         </G>
       ) : status === 'due' ? (
         <G>
-          <Ellipse rx={w * 0.58} ry={d * 0.64} fill={`url(#sw-${kind})`} />
+          <Ellipse rx={w * 0.58} ry={d * 0.64} fill={`url(#sw-${kind}-${u})`} />
           <Ellipse rx={w * 0.58} ry={d * 0.64} fill="none" stroke="#FFFFFF" strokeOpacity={0.35} strokeWidth={0.8} />
           <Path d={crownPath(kind)} transform="scale(0.46)" fill={c.enamel} opacity={0.95} />
         </G>
@@ -225,39 +234,40 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
 
 function Arch({ jaw, s, selected, onSelect }: { jaw: Jaw; s: number; selected: string; onSelect: (id: string) => void }) {
   const { c } = useTheme();
+  const u = useUid();
   const gum = useMemo(() => gumPath(jaw), [jaw]);
   return (
     <View style={{ width: MW * s, height: AH * s }}>
       <Svg width={MW * s} height={AH * s} viewBox={`0 0 ${MW} ${AH}`} style={{ position: 'absolute' }}>
         <Defs>
-          <LinearGradient id={`g${jaw}`} x1="0" y1="0" x2="0" y2="1">
+          <LinearGradient id={`g${jaw}-${u}`} x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={jaw === 'U' ? c.gumHi : c.gum} />
             <Stop offset="1" stopColor={jaw === 'U' ? c.gum : c.gumHi} />
           </LinearGradient>
-          <RadialGradient id="pal" cx="50%" cy="20%" r="90%">
+          <RadialGradient id={`pal-${u}`} cx="50%" cy="20%" r="90%">
             <Stop offset="0" stopColor={c.palate} />
             <Stop offset="1" stopColor={c.palateDeep} />
           </RadialGradient>
-          <RadialGradient id="ton" cx="50%" cy="75%" r="90%">
+          <RadialGradient id={`ton-${u}`} cx="50%" cy="75%" r="90%">
             <Stop offset="0" stopColor={c.tongue} />
             <Stop offset="1" stopColor={c.tongueDeep} />
           </RadialGradient>
         </Defs>
         {jaw === 'U' ? (
           <G>
-            <Path d={palatePath()} fill="url(#pal)" />
+            <Path d={palatePath()} fill={`url(#pal-${u})`} />
             {rugaePaths().map((p) => (
               <Path key={p} d={p} stroke="#E07C93" strokeWidth={2.2} fill="none" strokeLinecap="round" opacity={0.55} />
             ))}
           </G>
         ) : (
           <G>
-            <Path d={tonguePath()} fill="url(#ton)" />
+            <Path d={tonguePath()} fill={`url(#ton-${u})`} />
             <Path d={tongueGroove()} stroke={c.tongueDeep} strokeWidth={2.5} fill="none" strokeLinecap="round" opacity={0.6} />
           </G>
         )}
         <Path d={gum} stroke={c.gumDeep} strokeWidth={54} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <Path d={gum} stroke={`url(#g${jaw})`} strokeWidth={48} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Path d={gum} stroke={`url(#g${jaw}-${u})`} strokeWidth={48} fill="none" strokeLinecap="round" strokeLinejoin="round" />
         <Path d={gum} stroke="#FFFFFF" strokeWidth={10} fill="none" strokeLinecap="round" opacity={0.1} transform={`translate(0 ${jaw === 'U' ? -6 : 6})`} />
       </Svg>
       {ARCH.map(({ kind, side }, i) => {
@@ -271,19 +281,20 @@ function Arch({ jaw, s, selected, onSelect }: { jaw: Jaw; s: number; selected: s
 /** The whole open mouth, upper arch above lower, on a soft cavity glow. */
 export function MouthView({ s, selected, onSelect }: { s: number; selected: string; onSelect: (id: string) => void }) {
   const { c } = useTheme();
+  const u = useUid();
   const w = MW * s;
   const h = mouthHeight(s);
   return (
     <View style={{ width: w, height: h, alignItems: 'center' }}>
       <Svg width={w * 1.3} height={h * 1.1} viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', left: -w * 0.15, top: -h * 0.05 }}>
         <Defs>
-          <RadialGradient id="cav" cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
+          <RadialGradient id={`cav-${u}`} cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
             <Stop offset="0" stopColor="#6A1730" stopOpacity="0.9" />
             <Stop offset="0.6" stopColor={c.cavity} stopOpacity="0.75" />
             <Stop offset="1" stopColor={c.cavity} stopOpacity="0" />
           </RadialGradient>
         </Defs>
-        <Circle cx="50" cy="50" r="50" fill="url(#cav)" />
+        <Circle cx="50" cy="50" r="50" fill={`url(#cav-${u})`} />
       </Svg>
       <Arch jaw="U" s={s} selected={selected} onSelect={onSelect} />
       <View style={{ height: GAP * s }} />

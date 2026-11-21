@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import Svg, { ClipPath, Defs, G, Path, RadialGradient, Rect, Stop, Circle } from 'react-native-svg';
 
 // Kept here (not imported from ui.tsx) so the two files don't import each other.
@@ -6,24 +7,25 @@ const TOOTH_PATH =
 
 /** Tumbuh's logo, "Terbit": a first tooth rising from the gum like a sunrise. */
 export function LogoMark({ size = 36 }: { size?: number }) {
+  const u = useId().replace(/[^a-zA-Z0-9_-]/g, ''); // unique gradient ids (iPhone Safari)
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <Defs>
-        <RadialGradient id="tbBg" cx="50%" cy="62%" r="60%">
+        <RadialGradient id={`tbBg-${u}`} cx="50%" cy="62%" r="60%">
           <Stop offset="0" stopColor="#3A1B52" />
           <Stop offset="1" stopColor="#0B0A1A" />
         </RadialGradient>
-        <RadialGradient id="tbGlow" cx="50%" cy="50%" r="50%">
+        <RadialGradient id={`tbGlow-${u}`} cx="50%" cy="50%" r="50%">
           <Stop offset="0" stopColor="#FF7AB0" stopOpacity="0.75" />
           <Stop offset="1" stopColor="#FF7AB0" stopOpacity="0" />
         </RadialGradient>
-        <ClipPath id="tbClip">
+        <ClipPath id={`tbClip-${u}`}>
           <Rect width={100} height={100} rx={26} />
         </ClipPath>
       </Defs>
-      <G clipPath="url(#tbClip)">
-        <Rect width={100} height={100} fill="url(#tbBg)" />
-        <Circle cx={50} cy={58} r={34} fill="url(#tbGlow)" />
+      <G clipPath={`url(#tbClip-${u})`}>
+        <Rect width={100} height={100} fill={`url(#tbBg-${u})`} />
+        <Circle cx={50} cy={58} r={34} fill={`url(#tbGlow-${u})`} />
         <Path d="M30 34 A24 24 0 0 1 70 34" stroke="#FF9CC4" strokeWidth={2.4} fill="none" strokeLinecap="round" opacity={0.55} />
         <Path d="M24 26 A32 32 0 0 1 76 26" stroke="#FF9CC4" strokeWidth={2} fill="none" strokeLinecap="round" opacity={0.3} />
         <G transform="translate(26 30) scale(2)">

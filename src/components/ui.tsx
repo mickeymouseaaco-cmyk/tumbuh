@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react-native';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, type ReactNode, useId } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -283,6 +283,7 @@ export function Screen({ title, subtitle, eyebrow, top, children }: { title: str
  * so the page feels alive without anything moving near the text. Still with Reduce Motion.
  */
 export function Aurora() {
+  const u = useId().replace(/[^a-zA-Z0-9_-]/g, ''); // unique gradient ids (iPhone Safari)
   const { c } = useTheme();
   const reduce = useReducedMotion();
   const d = useSharedValue(0);
@@ -296,22 +297,22 @@ export function Aurora() {
       <Animated.View style={[{ position: 'absolute', top: -30, left: -30, right: -30, bottom: -30 }, drift]}>
         <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
           <Defs>
-            <RadialGradient id="aA" cx="10" cy="4" r="60" gradientUnits="userSpaceOnUse">
+            <RadialGradient id={`aA-${u}`} cx="10" cy="4" r="60" gradientUnits="userSpaceOnUse">
               <Stop offset="0" stopColor={c.auroraA} stopOpacity="0.40" />
               <Stop offset="1" stopColor={c.auroraA} stopOpacity="0" />
             </RadialGradient>
-            <RadialGradient id="aB" cx="100" cy="30" r="55" gradientUnits="userSpaceOnUse">
+            <RadialGradient id={`aB-${u}`} cx="100" cy="30" r="55" gradientUnits="userSpaceOnUse">
               <Stop offset="0" stopColor={c.auroraB} stopOpacity="0.16" />
               <Stop offset="1" stopColor={c.auroraB} stopOpacity="0" />
             </RadialGradient>
-            <RadialGradient id="aC" cx="30" cy="100" r="60" gradientUnits="userSpaceOnUse">
+            <RadialGradient id={`aC-${u}`} cx="30" cy="100" r="60" gradientUnits="userSpaceOnUse">
               <Stop offset="0" stopColor={c.auroraC} stopOpacity="0.16" />
               <Stop offset="1" stopColor={c.auroraC} stopOpacity="0" />
             </RadialGradient>
           </Defs>
-          <Rect x="0" y="0" width="100" height="100" fill="url(#aA)" />
-          <Rect x="0" y="0" width="100" height="100" fill="url(#aB)" />
-          <Rect x="0" y="0" width="100" height="100" fill="url(#aC)" />
+          <Rect x="0" y="0" width="100" height="100" fill={`url(#aA-${u})`} />
+          <Rect x="0" y="0" width="100" height="100" fill={`url(#aB-${u})`} />
+          <Rect x="0" y="0" width="100" height="100" fill={`url(#aC-${u})`} />
         </Svg>
       </Animated.View>
     </View>
