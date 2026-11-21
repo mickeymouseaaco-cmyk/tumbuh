@@ -22,7 +22,7 @@ type Finding = { key: string; by: By; tone: 'success' | 'warning' | 'danger' | '
 export const FINDINGS: Finding[] = [
   // what a parent can see — descriptions only
   { key: 'p-ok', by: 'parent', tone: 'success', bm: 'Nampak sihat', en: 'Looks healthy' },
-  { key: 'p-white', by: 'parent', tone: 'warning', bm: 'Tompok putih kapur', en: 'Chalky white spot', adviceBm: 'Tunjukkan kepada doktor gigi pada lawatan seterusnya. Berus 2 kali sehari dengan ubat gigi berfluorida.', adviceEn: 'Show it to a dentist at the next visit. Brush twice a day with fluoride toothpaste.' },
+  { key: 'p-white', by: 'parent', tone: 'warning', bm: 'Tompok putih atau kuning', en: 'White or yellow spot', adviceBm: 'Tunjukkan kepada doktor gigi pada lawatan seterusnya. Berus 2 kali sehari dengan ubat gigi berfluorida.', adviceEn: 'Show it to a dentist at the next visit. Brush twice a day with fluoride toothpaste.' },
   { key: 'p-brown', by: 'parent', tone: 'warning', bm: 'Tompok perang atau hitam', en: 'Brown or black spot', adviceBm: 'Ini bukan diagnosis. Buat temu janji dengan doktor gigi untuk diperiksa.', adviceEn: 'This is not a diagnosis. Book a dentist visit to have it checked.' },
   { key: 'p-chip', by: 'parent', tone: 'warning', bm: 'Patah atau sumbing', en: 'Chipped or broken', adviceBm: 'Jumpa doktor gigi. Segera jika ada darah, gigi goyang atau sakit.', adviceEn: 'See a dentist. Go soon if there is bleeding, a loose tooth or pain.' },
   { key: 'p-knock', by: 'parent', tone: 'warning', bm: 'Terhantuk / jatuh', en: 'Knocked / fall', adviceBm: 'Perhatikan warna gigi beberapa minggu. Jumpa doktor gigi jika ia goyang, bertukar warna atau gusi bengkak.', adviceEn: 'Watch the colour over the next weeks. See a dentist if it is loose, changes colour or the gum swells.' },
@@ -59,6 +59,29 @@ export const sorted = (list: Entry[] = []) => [...list].sort((a, b) => (a.date <
 
 /** The tooth colour on the chart says who recorded it: lavender = parent saw it, blue = dentist checked it. */
 export const WHO_COLOR: Record<By, string> = { parent: '#A78BFA', dentist: '#38BDF8' };
+
+/**
+ * How the newest record changes the tooth's drawing on the chart. Healthy (or nothing visible) → the normal tooth.
+ * A parent's spot is drawn as a spot; only a dentist's "decay" is drawn as a hole.
+ */
+export type Look = 'none' | 'spot' | 'brown' | 'cavity' | 'chip' | 'swelling' | 'filled' | 'missing';
+const LOOK: Record<string, Look> = {
+  'p-white': 'spot', 'p-brown': 'brown', 'p-chip': 'chip', 'p-gum': 'swelling',
+  'd-caries': 'cavity', 'd-filled': 'filled', 'd-out': 'missing',
+};
+export function toothLook(list?: Entry[]): Look {
+  const e = sorted(list)[0];
+  return e ? LOOK[e.finding] ?? 'none' : 'none';
+}
+export const LOOK_LABEL: Record<Exclude<Look, 'none'>, { bm: string; en: string }> = {
+  spot: { bm: 'Tompok putih/kuning', en: 'White/yellow spot' },
+  brown: { bm: 'Tompok perang/hitam', en: 'Brown/black spot' },
+  cavity: { bm: 'Gigi reput (doktor)', en: 'Decay (dentist)' },
+  chip: { bm: 'Patah/sumbing', en: 'Chipped' },
+  swelling: { bm: 'Gusi bengkak/nanah', en: 'Swollen gum/pus' },
+  filled: { bm: 'Ditampal', en: 'Filled' },
+  missing: { bm: 'Dicabut', en: 'Taken out' },
+};
 
 /** Colour of the marker on the chart: the newest entry decides. */
 export function markerTone(list?: Entry[]) {

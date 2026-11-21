@@ -11,7 +11,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, ClipPath, Defs, Ellipse, G, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
 
 import { ToothSheet } from '@/components/tooth-sheet';
 import { Eyebrow, PressableScale, T } from '@/components/ui';
@@ -33,7 +33,7 @@ import {
   tongueGroove,
   tonguePath,
 } from '@/lib/mouth-geometry';
-import { WHO_COLOR, fdi, markerTone } from '@/lib/records';
+import { LOOK_LABEL, fdi, toothLook, type Look } from '@/lib/records';
 import { useStore } from '@/lib/store';
 import { ARCH, range, statusOf, type Status } from '@/lib/teeth';
 import { fonts, motion, tone, useTheme } from '@/theme';
@@ -43,13 +43,27 @@ export const mouthHeight = (s: number) => (AH * 2 + GAP) * s;
 
 /* ---------- One tooth ---------- */
 
-/** One crown. `mark` tints the whole tooth (lavender = parent saw something, blue = dentist checked it). */
-export function Crown({ kind, status, s, mark }: { kind: Kind; status: Status; s: number; mark?: string | null }) {
+/**
+ * One crown, drawn as it looks. `look` (from the newest record) draws what was seen on the tooth:
+ * a white/yellow spot, a brown spot, a hole (decay, dentist only), a chipped corner, a swollen gum bump,
+ * a filling, or an empty socket. Healthy teeth stay plain.
+ */
+export function Crown({ kind, status, s, look = 'none' }: { kind: Kind; status: Status; s: number; look?: Look }) {
   const { c } = useTheme();
   const box = boxFor(kind);
   const { w, d } = CROWN[kind];
   const vb = `${-box / 2} ${-box / 2} ${box} ${box}`;
   const id = `e-${kind}`;
+  const molar = kind === 'm1' || kind === 'm2';
+  // a tooth that was taken out: just the healed socket in the gum
+  if (look === 'missing') {
+    return (
+      <Svg width={box * s} height={box * s} viewBox={vb}>
+        <Ellipse rx={w * 0.42} ry={d * 0.4} fill={c.gumDeep} opacity={0.55} />
+        <Ellipse rx={w * 0.26} ry={d * 0.22} fill={c.palateDeep} opacity={0.6} />
+      </Svg>
+    );
+  }
   return (
     <Svg width={box * s} height={box * s} viewBox={vb}>
       <Defs>
@@ -61,6 +75,9 @@ export function Crown({ kind, status, s, mark }: { kind: Kind; status: Status; s
           <Stop offset="0" stopColor="#FFD3DD" />
           <Stop offset="1" stopColor={c.swollen} />
         </RadialGradient>
+        <ClipPath id={`cl-${kind}`}>
+          <Path d={crownPath(kind)} transform="scale(1.06)" />
+        </ClipPath>
       </Defs>
       {status === 'in' ? (
         <G>
@@ -70,6 +87,46 @@ export function Crown({ kind, status, s, mark }: { kind: Kind; status: Status; s
             <Path key={p} d={p} stroke={c.enamelEdge} strokeWidth={0.9} fill="none" strokeLinecap="round" opacity={0.7} />
           ))}
           <Ellipse cx={-w * 0.18} cy={-d * 0.12} rx={w * 0.16} ry={d * 0.1} fill="#FFFFFF" opacity={0.85} />
+          {look === 'spot' ? (
+            // chalky white / yellowish patches near the gum line
+            <G>
+              <Ellipse cx={w * 0.1} cy={d * 0.24} rx={w * 0.2} ry={d * 0.1} fill="#F3E4A6" stroke="#D9C27A" strokeWidth={0.6} />
+              <Ellipse cx={-w * 0.2} cy={d * 0.28} rx={w * 0.09} ry={d * 0.07} fill="#F3E4A6" stroke="#D9C27A" strokeWidth={0.5} />
+            </G>
+          ) : look === 'brown' ? (
+            <G>
+              <Ellipse cx={w * 0.12} cy={molar ? 0 : d * 0.1} rx={w * 0.13} ry={d * 0.12} fill="#7A4A26" />
+              <Ellipse cx={-w * 0.16} cy={d * 0.2} rx={w * 0.06} ry={d * 0.06} fill="#8E5A2E" opacity={0.85} />
+            </G>
+          ) : look === 'cavity' ? (
+            // a dark hole with a soft brown rim
+            <G>
+              <Path
+                d={`M ${-w * 0.2} ${-d * 0.02} Q ${-w * 0.12} ${-d * 0.24} ${w * 0.08} ${-d * 0.16} Q ${w * 0.28} ${-d * 0.08} ${w * 0.18} ${d * 0.16} Q ${w * 0.04} ${d * 0.3} ${-w * 0.14} ${d * 0.18} Q ${-w * 0.3} ${d * 0.08} ${-w * 0.2} ${-d * 0.02} Z`}
+                fill="#8B5A2B"
+              />
+              <Path
+                d={`M ${-w * 0.12} ${0} Q ${-w * 0.06} ${-d * 0.13} ${w * 0.07} ${-d * 0.08} Q ${w * 0.18} ${-d * 0.02} ${w * 0.1} ${d * 0.1} Q ${0} ${d * 0.19} ${-w * 0.1} ${d * 0.1} Z`}
+                fill="#2B140C"
+              />
+            </G>
+          ) : look === 'chip' ? (
+            // a corner broken off, with a jagged edge
+            <G>
+              <Path clipPath={`url(#cl-${kind})`} d={`M ${w * 0.12} ${-d * 0.62} L ${w * 0.62} ${-d * 0.62} L ${w * 0.62} ${-d * 0.02} L ${w * 0.4} ${-d * 0.16} L ${w * 0.36} ${-d * 0.34} L ${w * 0.18} ${-d * 0.38} Z`} fill={c.gum} />
+              <Path d={`M ${w * 0.5} ${-d * 0.07} L ${w * 0.4} ${-d * 0.16} L ${w * 0.36} ${-d * 0.34} L ${w * 0.18} ${-d * 0.38} L ${w * 0.14} ${-d * 0.5}`} fill="none" stroke={c.enamelEdge} strokeWidth={0.9} strokeLinejoin="round" />
+            </G>
+          ) : look === 'filled' ? (
+            <G>
+              <Path
+                d={`M ${-w * 0.16} ${-d * 0.06} Q ${-w * 0.08} ${-d * 0.22} ${w * 0.1} ${-d * 0.14} Q ${w * 0.24} ${-d * 0.04} ${w * 0.14} ${d * 0.14} Q ${0} ${d * 0.24} ${-w * 0.14} ${d * 0.12} Q ${-w * 0.24} ${d * 0.04} ${-w * 0.16} ${-d * 0.06} Z`}
+                fill="#AEB6C2"
+                stroke="#8B95A3"
+                strokeWidth={0.7}
+              />
+              <Ellipse cx={-w * 0.04} cy={-d * 0.06} rx={w * 0.07} ry={d * 0.04} fill="#FFFFFF" opacity={0.7} />
+            </G>
+          ) : null}
         </G>
       ) : status === 'due' ? (
         <G>
@@ -84,15 +141,13 @@ export function Crown({ kind, status, s, mark }: { kind: Kind; status: Status; s
           <Path d={crownPath(kind)} transform="scale(0.86)" fill="none" stroke={c.gumDeep} strokeWidth={1.1} strokeDasharray="2 1.6" opacity={0.9} />
         </G>
       )}
-      {mark ? (
-        <Path
-          d={crownPath(kind)}
-          transform={`scale(${status === 'in' ? 1 : status === 'due' ? 0.62 : 0.86})`}
-          fill={mark}
-          fillOpacity={status === 'in' ? 0.6 : 0.75}
-          stroke={mark}
-          strokeWidth={1.6}
-        />
+      {look === 'swelling' ? (
+        // a red, swollen gum bump with a yellow head beside the tooth
+        <G>
+          <Ellipse cx={w * 0.52} cy={d * 0.5} rx={w * 0.24} ry={d * 0.22} fill="#E0566F" opacity={0.85} />
+          <Ellipse cx={w * 0.52} cy={d * 0.5} rx={w * 0.12} ry={d * 0.11} fill="#F6D36B" />
+          <Ellipse cx={w * 0.48} cy={d * 0.46} rx={w * 0.04} ry={d * 0.035} fill="#FFFFFF" opacity={0.8} />
+        </G>
       ) : null}
     </Svg>
   );
@@ -131,8 +186,7 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
 
   const crownStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${rot}deg` }, { scale: grow.value }] }));
   // a small dot shows this tooth has records: violet = parent's observation, colour = dentist's finding
-  const mark = markerTone(records[id]);
-  const markColor = mark ? WHO_COLOR[mark.by] : null;
+  const look = toothLook(records[id]);
   const haloStyle = useAnimatedStyle(() => ({ opacity: halo.value }));
   const size = box * s;
 
@@ -161,7 +215,7 @@ function MouthTooth({ jaw, kind, side, index, s, selected, onSelect }: { jaw: Ja
         />
       ) : null}
       <Animated.View style={[{ width: size, height: size }, crownStyle]}>
-        <Crown kind={kind} status={status} s={s} mark={markColor} />
+        <Crown kind={kind} status={status} s={s} look={look} />
       </Animated.View>
     </PressableScale>
   );
@@ -247,16 +301,17 @@ export function MouthExplorer({ maxWidth }: { maxWidth?: number }) {
   const [sel, setSel] = useState<string | null>(null);
   const avail = Math.min(maxWidth ?? width, 560) - 40;
   const s = Math.max(0.8, Math.min(1.25, avail / MW));
-  const recorded = Object.keys(records).length;
+  // the legend lists only the problems drawn on this child's chart
+  const looks = [...new Set(Object.values(records).map((l) => toothLook(l)))].filter((x) => x !== 'none') as Exclude<Look, 'none'>[];
   const legendItem = (key: string, swatch: ReactNode, label: string) => (
     <View key={key} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
       {swatch}
       <T style={{ fontFamily: fonts.medium, fontSize: 13, color: c.textMuted }}>{label}</T>
     </View>
   );
-  const swatch = (color: string) => (
-    <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center' }}>
-      <Crown kind="c" status="in" s={0.5} mark={color} />
+  const swatch = (l: Look) => (
+    <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center' }}>
+      <Crown kind="m1" status="in" s={0.42} look={l} />
     </View>
   );
 
@@ -279,8 +334,7 @@ export function MouthExplorer({ maxWidth }: { maxWidth?: number }) {
             st === 'in' ? t.legIn : st === 'due' ? t.legDue : t.legNot,
           ),
         )}
-        {recorded ? legendItem('p', swatch(WHO_COLOR.parent), lang === 'bm' ? 'Pemerhatian ibu bapa' : 'Parent observation') : null}
-        {recorded ? legendItem('d', swatch(WHO_COLOR.dentist), lang === 'bm' ? 'Disahkan doktor gigi' : 'Dentist confirmed') : null}
+        {looks.map((l) => legendItem(l, swatch(l), LOOK_LABEL[l][lang]))}
       </View>
 
       <ToothSheet tooth={sel} onClose={() => setSel(null)} />

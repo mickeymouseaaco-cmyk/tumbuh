@@ -18,7 +18,7 @@ import { boxFor } from '@/lib/mouth-geometry';
 import { toothAges, toothName, type Jaw, type Kind, type Side } from '@/lib/content';
 import { fmt, toKey } from '@/lib/fluoride';
 import { haptic } from '@/lib/haptics';
-import { FINDINGS, KIND_INFO, WHO_COLOR, deletePhoto, fdi, findingOf, markerTone, placeName, savePhoto, sorted, usePhoto, type By, type Entry } from '@/lib/records';
+import { FINDINGS, KIND_INFO, WHO_COLOR, deletePhoto, fdi, findingOf, toothLook, placeName, savePhoto, sorted, usePhoto, type By, type Entry } from '@/lib/records';
 import { useStore } from '@/lib/store';
 import { statusOf, range } from '@/lib/teeth';
 import { elevation, fonts, motion, radius, tone, typo, useTheme } from '@/theme';
@@ -325,7 +325,7 @@ export function ToothSheet({ tooth, onClose }: { tooth: string | null; onClose: 
             {/* header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <View style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: c.gum, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 2, borderColor: c.accentBorder }}>
-                <Crown kind={kind} status={status} s={64 / boxFor(kind)} mark={markerTone(records[tooth]) ? WHO_COLOR[markerTone(records[tooth])!.by] : null} />
+                <Crown kind={kind} status={status} s={64 / boxFor(kind)} look={toothLook(records[tooth])} />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <T style={[typo.heading, { fontSize: 20, lineHeight: 25 }]}>{toothName(jaw, kind, lang)}</T>
